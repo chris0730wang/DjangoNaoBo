@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf8">
+  <title>測試2</title>
+  <script type="text/javascript">
+
+
+self.moveTo(250,200);   //設定與螢幕關係位置
+self.resizeTo(300,200);   //設定蹦現視窗大小
+window.setTimeout('window.close()',1000); //設定自動關閉視窗時間(1/1000秒),所以7000實際上是7秒
+
+  </script>
+</head>
+<body>
+  <button onclick="show()">
+   two
+  </button>
+  <iframe src="http://192.168.0.104/apps/djangoairnao0825/" style="width: 80%; height: 600px" scrolling="no" marginwidth="0" marginheight="0" frameborder="0" vspace="0" hspace="0">
+  </iframe>
+</body>
+</html>
