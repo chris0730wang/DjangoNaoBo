@@ -53,6 +53,13 @@ def hello4(request):
     print(checklesson)
     return render(request,"hello4.html",locals())
 
+def uncheckedstudentNET(request):
+    try:
+        uncheckedstudent = studentcheck.objects.get(FirstweekCheck="0")
+    except:
+        errormessage = " (讀取錯誤 !)"
+    return render(request,"uncheckedstudent.html", locals())
+
 def studentcheckNET(request):
 
     cId = request.GET.get('cId')
@@ -62,7 +69,7 @@ def studentcheckNET(request):
     try:
         t = studentcheck.objects.get(cId=cId)
         if week == '1':
-            t.FirstweekCheck = '1'
+            t.FirstweekCheck = "已簽到"
         if week == '2':
             t.SecondweekCheck = '1'
         if week == '3':

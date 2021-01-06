@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, re_path
-from myapp.views import pay, sayhello, hello3, hello4, studentcheckNET, socket#, teachercheckstudent
+from myapp.views import pay, sayhello, hello3, hello4, socket, uncheckedstudentNET, studentcheckNET
 
 urlpatterns = [
 
@@ -27,4 +27,5 @@ urlpatterns = [
     re_path(r'^hello4/', hello4),
     re_path(r'^socket/', socket),
     re_path(r'^studentcheck/', studentcheckNET),
+    re_path(r'^uncheckedstudent/', uncheckedstudentNET)
 ]
