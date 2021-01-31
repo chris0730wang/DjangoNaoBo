@@ -1,21 +1,193 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <link rel="stylesheet"  href="{%  static  'css/style.css'  %}">
+    <script src="{% static 'js/socket.io.min.js' %}"></script>
+
+    <script type="text/javascript">
+    var nao_address = "192.168.0.101";
+    console.log(nao_address);
+    var jsQim = '/static/js/qimessaging.js';
+    if (nao_address == '') {
+        nao_address = '10.2.1.164';
+        jsQim = 'http://' + nao_address + jsQim;
+    }
+    $.getScript(jsQim, function() {
+        console.log('QiMessaging Library Loaded');
+        $.getScript('/static/js/jsnao.js', function() {
+        console.log('JsNAO Library Loaded');
+	    console.log('good job');
+        $(document).ready(function() {
+            jsnao.connect(nao_address);
+            $('#RbtSay').keyup(function (e){
+            if (e.keyCode == 13 /* Enter */) {
+                jsnao.al_tts.say($('#RbtSay').val());
+            }
+            });
+        });
+        });
+    });
+    </script> <!-- nao 連線 -->
+
     <title>點名</title>
 </head>
 <body>
-    <h2> 以下為尚未簽到的學生 {{errormessage}}</h2>
-    <table border="1" cellpadding="0" cellspacing="0">
-        <th>學號</th><th>姓名</th><th>組別</th><th>簽到情形</th>
-        {% for student in uncheckedstudent %}
+
+<script language="JavaScript">
+
+      function RunSocket(){
+          $.ajax({
+              url: "http://140.134.26.196/socket/",
+              context: document.body,
+              success: function(){
+                  alert('ok...');
+              }
+          });
+      }
+
+      function changecheck(changecheckstudent){
+          console.log(changecheckstudent)
+          $.ajax({
+              url: "http://140.134.26.196"+changecheckstudent,
+              context: document.body,
+          });
+      }
+
+      function changepoint(changepointstudent){
+          console.log(changepointstudent)
+          $.ajax({
+              url: "http://140.134.26.196"+changepointstudent,
+              context: document.body,
+          });
+      }
+
+      function randompickstudent(weekandgroup){
+          $.ajax({
+              url: "http://140.134.26.196"+weekandgroup,
+              context: document.body,
+              data: this.data,
+              success: function (data){
+                  alert(data.my_string);
+                  jsnao.al_tts.setLanguage('Chinese');
+                  jsnao.al_tts.say(data.my_string.toString());
+              }
+          });
+      }
+
+</script>  <!-- functions -->
+
+<button onclick="RunSocket()"> Open socket and connect every zenbo junior !</button>  <!-- 開啟 socket (給zenbo junior 指令) -->
+
+    <table width="100%" align="center">
+        <caption style="font-size: 30px; font-family: 標楷體"> 各組學生名單 </caption>
+        <colgroup style="background-color: #1b6d85;"></colgroup>
+        <colgroup style="background-color: #f5dd5d;"></colgroup>
+        <colgroup style="background-color: #3e8f3e;"></colgroup>
+        <colgroup style="background-color: #a41515;"></colgroup>
+        <tr>
+            <th>第一組</th>
+            <th>第二組</th>
+            <th>第三組</th>
+            <th>第四組</th>
+        </tr>
+
+    <form action="" method="GET" name="from1">
+
+    <table id="table1" width="25%" style="float: left;margin: 0px;padding: 0px" border="0">
+        <caption><br> <button onclick="randompickstudent(value)" value="/randompickstudent/?week=1&group=1">抽點一位學生</button>
+                    <br> ----------------------------------------- <br></caption>
+        <tr>
+            <th>學號</th>
+            <th>姓名</th>
+            <th>簽到情形</th>
+            <th>分數更動</th>
+        </tr>
+
+        {% for student in checkedstudent1 %}
             <tr>
-                <td>{{ student.cId }}</td>
-                <td>{{ student.cName }}</td>
-                <td>{{ student.cGroup }}</td>
-                <td>{{ student.Firstweekcheck }}</td>
+                <td align="center">{{ student.cId }}</td>
+                <td align="center">{{ student.cName }}</td>
+                <td align="center">{{ student.FirstweekCheck }} <button onclick="changecheck(value)" value="/edit/?cId={{student.cId}}">更動</button> </td>
+                <td align="center"><button onclick="changepoint(value)" value="/pluspoint/?cId={{student.cId}}">+</button>{{ student.point }} <button onclick="changepoint(value)" value="/subpoint/?cId={{student.cId}}">-</button></td>
             </tr>
         {% endfor %}
+
     </table>
+
+    <form action="" method="GET" name="from1">
+
+    <table width="25%" style="float: left;margin: 0px;padding: 0px" border="0">
+        <caption><br> <button onclick="randompickstudent(value)" value="/randompickstudent/?week=1&group=1">抽點一位學生</button>
+            <br> ----------------------------------------- <br></caption>
+        <tr>
+            <th>學號</th>
+            <th>姓名</th>
+            <th>簽到情形</th>
+            <th>分數更動</th>
+        </tr>
+
+        {% for student in checkedstudent2 %}
+            <tr>
+                <td align="center">{{ student.cId }}</td>
+                <td align="center">{{ student.cName }}</td>
+                <td align="center">{{ student.FirstweekCheck }} <button onclick="changecheck(value)" value="/edit/?cId={{student.cId}}">更動</button> </td>
+                <td align="center"><button onclick="changepoint(value)" value="/pluspoint/?cId={{student.cId}}">+</button>{{ student.point }} <button onclick="changepoint(value)" value="/subpoint/?cId={{student.cId}}">-</button></td>
+            </tr>
+        {% endfor %}
+
+    </table>
+
+    <form action="" method="GET" name="from1">
+
+    <table width="25%" style="float: left;margin: 0px;padding: 0px" border="0">
+        <caption><br> <button onclick="randompickstudent(value)" value="/randompickstudent/?week=1&group=1">抽點一位學生</button>
+            <br> ----------------------------------------- <br></caption>
+        <tr>
+            <th>學號</th>
+            <th>姓名</th>
+            <th>簽到情形</th>
+            <th>分數更動</th>
+        </tr>
+
+        {% for student in checkedstudent3 %}
+            <tr>
+                <td align="center">{{ student.cId }}</td>
+                <td align="center">{{ student.cName }}</td>
+                <td align="center">{{ student.FirstweekCheck }} <button onclick="changecheck(value)" value="/edit/?cId={{student.cId}}">更動</button> </td>
+                <td align="center"><button onclick="changepoint(value)" value="/pluspoint/?cId={{student.cId}}">+</button>{{ student.point }} <button onclick="changepoint(value)" value="/subpoint/?cId={{student.cId}}">-</button></td>
+            </tr>
+        {% endfor %}
+
+    </table>
+
+    <form action="" method="GET" name="from1">
+
+    <table width="25%" style="float: left;margin: 0px;padding: 0px" border="0">
+        <caption><br> <button onclick="randompickstudent(value)" value="/randompickstudent/?week=1&group=1">抽點一位學生</button>
+            <br> ----------------------------------------- <br></caption>
+        <tr>
+            <th>學號</th>
+            <th>姓名</th>
+            <th>簽到情形</th>
+            <th>分數更動</th>
+        </tr>
+
+        {% for student in checkedstudent4 %}
+            <tr>
+                <td align="center">{{ student.cId }}</td>
+                <td align="center">{{ student.cName }}</td>
+                <td align="center">{{ student.FirstweekCheck }} <button onclick="changecheck(value)" value="/edit/?cId={{student.cId}}">更動</button> </td>
+                <td align="center"><button onclick="changepoint(value)" value="/pluspoint/?cId={{student.cId}}">+</button>{{ student.point }} <button onclick="changepoint(value)" value="/subpoint/?cId={{student.cId}}">-</button></td>
+            </tr>
+        {% endfor %}
+
+    </table>
+
+    </form>
+    </table>
+
 </body>
 </html>

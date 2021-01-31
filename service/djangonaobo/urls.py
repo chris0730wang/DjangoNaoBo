@@ -14,18 +14,28 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, re_path
-from myapp.views import pay, sayhello, hello3, hello4, socket, uncheckedstudentNET, studentcheckNET
+from django.urls import path, re_path, include
+from django.conf import settings
+from django.conf.urls.static import static
+from myapp.views import pay, sayhello, hello4, socket, checkstudentNET, studentcheckNET, editcheck, pluspointNET, subpointNET, randompickstudentNET
+from myapp.views import naoindexNET, vocabularypreviewresultNET, beforeyoureadNET
 
 urlpatterns = [
 
     path('admin/', admin.site.urls),
     path('add_pay/', pay),
-    #re_path(r'^teachercheckstudent/',teachercheckstudent),
+    path('', include('gsheets.urls')),
     re_path(r'^$', sayhello),
-    re_path(r'^hello3/(\w+)/$', hello3),
     re_path(r'^hello4/', hello4),
     re_path(r'^socket/', socket),
     re_path(r'^studentcheck/', studentcheckNET),
-    re_path(r'^uncheckedstudent/', uncheckedstudentNET)
-]
+    re_path(r'^checkstudent/', checkstudentNET),
+    re_path(r'^edit/', editcheck),
+    re_path(r'^pluspoint/', pluspointNET),
+    re_path(r'^subpoint/', subpointNET),
+    re_path(r'^randompickstudent/', randompickstudentNET),
+    re_path(r'^naoindex/', naoindexNET),
+    re_path(r'^vocabularypreviewresult/', vocabularypreviewresultNET),
+    re_path(r'^beforeyoureadresult/', beforeyoureadNET)
+
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

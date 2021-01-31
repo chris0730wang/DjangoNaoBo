@@ -15,7 +15,6 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
@@ -26,7 +25,6 @@ SECRET_KEY = 'lw_=t23#$lot7&^y(6ds%o0q(zjfhy#+0h3)oca1xavj%2*al#'
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
-
 
 # Application definition
 
@@ -39,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'myapp',
+    'gsheets',
 ]
 
 MIDDLEWARE = [
@@ -46,7 +45,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-#    'django.middleware.csrf.CsrfViewMiddleware',
+    #    'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -72,28 +71,32 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'djangonaobo.wsgi.application'
 
-
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "static"),
+]
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
-#DATABASES = {
+# DATABASES = {
 #    'default': {
 #        'ENGINE': 'django.db.backends.sqlite3',
 #        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
 #    }
-#}
+# }
 
 DATABASES = {
     'default': {
-    'ENGINE': 'django.db.backends.mysql',
-    'NAME': 'djangonaobo',
-    'USER': 'root',
-    'PASSWORD': 'Cavs.lebron23',
-    'HOST': 'localhost',
-    'PORT': '3306',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'djangonaobo',
+        'USER': 'root',
+        'PASSWORD': 'Cavs.lebron23',
+        'HOST': 'localhost',
+        'PORT': '3306',
     }
 }
+X_FRAME_OPTIONS = 'ALLOWALL'
 
+XS_SHARING_ALLOWED_METHODS = ['POST', 'GET', 'OPTIONS', 'PUT', 'DELETE']
 
 # Password validation
 # https://docs.djangoproject.com/en/2.1/ref/settings/#auth-password-validators
@@ -113,7 +116,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/2.1/topics/i18n/
 
@@ -129,13 +131,14 @@ USE_TZ = True
 
 DEFAULT_CHARSET = 'utf-8'
 
-DATABASE_OPTIONS = { 'charset': 'utf8', }
+DATABASE_OPTIONS = {'charset': 'utf8', }
 
-FILE_CHARSET= 'gb18030'
+FILE_CHARSET = 'gb18030'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = "C:/Users/WangLab/PycharmProjects/mysite0928/service/staticfiles"
 
-APPEND_SLASH=False
+APPEND_SLASH = False

@@ -3,20 +3,33 @@
 <head>
 <meta charset="utf8">
   <title>測試2</title>
-  <script type="text/javascript">
+  <script>
+    var vocabualrypreviewresult = "http://140.134.26.196/vocabularypreviewresult/?";
 
+    function collectunit(unit){
+      vocabualrypreviewresult += unit;
+    }
 
-self.moveTo(250,200);   //設定與螢幕關係位置
-self.resizeTo(300,200);   //設定蹦現視窗大小
-window.setTimeout('window.close()',1000); //設定自動關閉視窗時間(1/1000秒),所以7000實際上是7秒
-
+    function collectreading(reading){
+      vocabualrypreviewresult += reading;
+    }
   </script>
 </head>
 <body>
-  <button onclick="show()">
-   two
-  </button>
-  <iframe src="http://192.168.0.104/apps/djangoairnao0825/" style="width: 80%; height: 600px" scrolling="no" marginwidth="0" marginheight="0" frameborder="0" vspace="0" hspace="0">
+  <iframe src="http://140.134.26.196/checkstudent/" style="width: 80%; height: 450px" scrolling="no" marginwidth="0" marginheight="0" frameborder="0" vspace="0" hspace="0">
   </iframe>
+
+  <h1>Vocabulary Preview</h1>
+  <form name="change">
+  <SELECT NAME="options" ONCHANGE="document.getElementById('youriframe').src = this.options[this.selectedIndex].value" style="vertical-align:text-top;">
+  <option>Select unit and reading</option>
+  <option value="http://140.134.26.196/vocabularypreviewresult/?unit=5&reading=1">U5R1</option>
+  <option value="http://140.134.26.196/vocabularypreviewresult/?unit=5&reading=2">U5R2</option>
+  <option value="http://140.134.26.196/vocabularypreviewresult/?unit=7&reading=1">U7R1</option>
+  <option value="http://140.134.26.196/vocabularypreviewresult/?unit=7&reading=2">U7R2</option>
+  </SELECT>
+  <br>
+  <iframe name="iframe" id="youriframe" style="width: 80%; height: 300px" scrolling="no" marginwidth="0" marginheight="0" frameborder="0" vspace="0" hspace="50"></iframe>
+  </form>
 </body>
 </html>
