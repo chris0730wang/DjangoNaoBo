@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <link rel="stylesheet"  href="{%  static  'css/style.css'  %}">
+    <script src="{% static 'js/socket.io.min.js' %}"></script>
+
+    <script type="text/javascript">
+    var nao_address = "192.168.0.101";
+    console.log(nao_address);
+    var jsQim = '/static/js/qimessaging.js';
+    if (nao_address == '') {
+        nao_address = '10.2.1.164';
+        jsQim = 'http://' + nao_address + jsQim;
+    }
+    $.getScript(jsQim, function() {
+        console.log('QiMessaging Library Loaded');
+        $.getScript('/static/js/jsnao.js', function() {
+        console.log('JsNAO Library Loaded');
+	    console.log('good job');
+        $(document).ready(function() {
+            jsnao.connect(nao_address);
+            $('#RbtSay').keyup(function (e){
+            if (e.keyCode == 13 /* Enter */) {
+                jsnao.al_tts.say($('#RbtSay').val());
+            }
+            });
+        });
+        });
+    });
+    </script> <!-- nao 連線 -->
+
+    <title>U?R? vocabulary preview </title>
+</head>
+<body>
+<table id="table1" width="100%" style="float: left;margin: 0px;padding: 0px" border="1">
+        <caption>Unit {{unit}} Reading {{reading}} Vocabulary Preview Result<br><br>-----------------------------------------------<br>
+            Read the sentence. Choose the choice that is closet to the meaning of the AWL word in quotation mark<br></caption>
+        <tr>
+            <th>題號</th>
+            <th>題目</th>
+            <th>選項一</th>
+            <th>選項二</th>
+            <th>選項三</th>
+            <th>正確答案</th>
+            <th>錯誤率</th>
+        </tr>
+
+        {% for correctans in correctansset %}
+            <tr>
+                <td align="center">{{ correctans.questionnum }}</td>
+                <td align="center">{{ correctans.question }}</td>
+                <td align="center">{{ correctans.option1 }} <div style="float:right">({{correctans.numof1}})</div></td>
+                <td align="center">{{ correctans.option2 }} <div style="float:right">({{correctans.numof2}})</div></td>
+                <td align="center">{{ correctans.option3 }} <div style="float:right">({{correctans.numof3}})</div></td>
+                <td align="center">{{ correctans.correctans }}</td>
+                <td align="center">{{ correctans.falsepercent }}%</td>
+            </tr>
+        {% endfor %}
+
+    </table>
+</body>
+</html>
