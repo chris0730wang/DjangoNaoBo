@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+    <table width="100%" align="center">
+        <caption style="font-size: 30px; font-family: 標楷體"> Result Detail
+
+        </caption>
+        <colgroup style="background-color: #1b6d85;"></colgroup>
+        <colgroup style="background-color: #f5dd5d;"></colgroup>
+        <colgroup style="background-color: #3e8f3e;"></colgroup>
+        <colgroup style="background-color: #a41515;"></colgroup>
+        <colgroup style="background-color: #d58512;"></colgroup>
+        <tr>
+            <th>Group 1</th>
+            <th>Group 2</th>
+            <th>Group 3</th>
+            <th>Group 4</th>
+            <th>Group 5</th>
+        </tr>
+
+    <form action="" method="GET" name="from1">
+
+    <table width="20%" style="float: left;margin: 0px;padding: 0px" border="0">
+        <caption><br> ----------------------------------<br>AVG : {{ group1avg }} <br></caption>
+        <tr>
+            <th>學號</th>
+            <th>姓名</th>
+            <th>分數</th>
+        </tr>
+
+        {% for student in group1 %}
+            <tr>
+                <td align="center">{{ student.cId }}</td>
+                <td align="center">{{ student.cName }}</td>
+                <td align="center">{{ student.vp1point }}</td>
+            </tr>
+        {% endfor %}
+
+    </table>
+
+    </form>
+
+    <form action="" method="GET" name="from1">
+
+    <table width="20%" style="float: left;margin: 0px;padding: 0px" border="0">
+        <caption><br> ----------------------------------<br>AVG : {{ group2avg }} <br></caption>
+        <tr>
+            <th>學號</th>
+            <th>姓名</th>
+            <th>分數</th>
+        </tr>
+
+        {% for student in group2 %}
+            <tr>
+                <td align="center">{{ student.cId }}</td>
+                <td align="center">{{ student.cName }}</td>
+                <td align="center">{{ student.vp1point }}</td>
+            </tr>
+        {% endfor %}
+
+    </table>
+
+    </form>
+
+    <form action="" method="GET" name="from1">
+
+    <table width="20%" style="float: left;margin: 0px;padding: 0px" border="0">
+        <caption><br> ----------------------------------<br>AVG : {{ group3avg }} <br></caption>
+        <tr>
+            <th>學號</th>
+            <th>姓名</th>
+            <th>分數</th>
+        </tr>
+
+        {% for student in group3 %}
+            <tr>
+                <td align="center">{{ student.cId }}</td>
+                <td align="center">{{ student.cName }}</td>
+                <td align="center">{{ student.vp1point }}</td>
+            </tr>
+        {% endfor %}
+
+    </table>
+
+    </form>
+    <form action="" method="GET" name="from1">
+
+    <table width="20%" style="float: left;margin: 0px;padding: 0px" border="0">
+        <caption><br> ----------------------------------<br>AVG : {{ group4avg }} <br></caption>
+        <tr>
+            <th>學號</th>
+            <th>姓名</th>
+            <th>分數</th>
+        </tr>
+
+        {% for student in group4 %}
+            <tr>
+                <td align="center">{{ student.cId }}</td>
+                <td align="center">{{ student.cName }}</td>
+                <td align="center">{{ student.vp1point }}</td>
+            </tr>
+        {% endfor %}
+
+    </table>
+
+    </form>
+
+    <form action="" method="GET" name="from1">
+
+    <table width="20%" style="float: left;margin: 0px;padding: 0px" border="0">
+        <caption><br> ----------------------------------<br>AVG : {{ group5avg }} <br></caption>
+        <tr>
+            <th>學號</th>
+            <th>姓名</th>
+            <th>分數</th>
+        </tr>
+
+        {% for student in group5 %}
+            <tr>
+                <td align="center">{{ student.cId }}</td>
+                <td align="center">{{ student.cName }}</td>
+                <td align="center">{{ student.vp1point }}</td>
+            </tr>
+        {% endfor %}
+
+    </table>
+
+    </form>
+
+    </table>
+
+</body>
+</html>

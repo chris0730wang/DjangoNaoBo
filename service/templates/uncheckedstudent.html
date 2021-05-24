@@ -1,15 +1,25 @@
-<!DOCTYPE html>
 {% load static %}
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="stylesheet"  type="text/css" href="{%  static  'css/style.css'  %}">
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-    <link rel="stylesheet"  href="{%  static  'css/style.css'  %}">
     <script src="{% static 'js/socket.io.min.js' %}"></script>
 
     <script type="text/javascript">
+    getnaoip();
+    var naoiptoconnect="";
+    function getnaoip(){
+        $.ajax({
+              url: "http://140.134.26.196/getnaoip/",
+              context: document.body,
+              success: function(data){
+                  naoiptoconnect=data.IP;
+              }
+          });
+    }
     var nao_address = "192.168.0.101";
-    console.log(nao_address);
     var jsQim = '/static/js/qimessaging.js';
     if (nao_address == '') {
         nao_address = '10.2.1.164';
@@ -19,9 +29,8 @@
         console.log('QiMessaging Library Loaded');
         $.getScript('/static/js/jsnao.js', function() {
         console.log('JsNAO Library Loaded');
-	    console.log('good job');
         $(document).ready(function() {
-            jsnao.connect(nao_address);
+            jsnao.connect(naoiptoconnect);
             $('#RbtSay').keyup(function (e){
             if (e.keyCode == 13 /* Enter */) {
                 jsnao.al_tts.say($('#RbtSay').val());
@@ -30,17 +39,129 @@
         });
         });
     });
-    </script> <!-- nao 連線 -->
 
+
+    </script> <!-- nao 連線 -->
+    <style>
+@import url('https://fonts.googleapis.com/css?family=Roboto:100,300');
+
+button[data-setter] {
+  outline: none;
+  background: transparent;
+  border: none;
+  font-family: 'Roboto';
+  font-weight: 300;
+  font-size: 18px;
+  width: 25px;
+  height: 30px;
+  color: #F7958E;
+  cursor: pointer;
+}
+
+button[data-setter]:hover { opacity: 0.5; }
+
+.container {
+  position: relative;
+  top: 0px;
+  width: 300px;
+  margin: 0 auto;
+}
+
+.setters {
+  position: absolute;
+  left: 85px;
+  top: 650px;
+}
+
+.minutes-set {
+  float: left;
+  margin-right: 28px;
+}
+
+.seconds-set { float: right; }
+
+.controlls {
+  position: absolute;
+  left: 75px;
+  top: 675px;
+  text-align: center;
+}
+
+.display-remain-time {
+  font-family: 'Roboto';
+  font-weight: 100;
+  font-size: 65px;
+  color: #F7958E;
+}
+
+#pause {
+  outline: none;
+  background: transparent;
+  border: none;
+  margin-top: 10px;
+  width: 50px;
+  height: 50px;
+  position: relative;
+}
+
+.play::before {
+  display: block;
+  content: "";
+  position: absolute;
+  top: 8px;
+  left: 16px;
+  border-top: 15px solid transparent;
+  border-bottom: 15px solid transparent;
+  border-left: 22px solid #F7958E;
+}
+
+.pause::after {
+  content: "";
+  position: absolute;
+  top: 8px;
+  left: 12px;
+  width: 15px;
+  height: 30px;
+  background-color: transparent;
+  border-radius: 1px;
+  border: 5px solid #F7958E;
+  border-top: none;
+  border-bottom: none;
+}
+
+#pause:hover { opacity: 0.8; }
+
+.e-c-base {
+  fill: none;
+  stroke: #B6B6B6;
+  stroke-width: 4px
+}
+
+.e-c-progress {
+  fill: none;
+  stroke: #F7958E;
+  stroke-width: 4px;
+  transition: stroke-dashoffset 0.7s;
+}
+
+.e-c-pointer {
+  fill: #FFF;
+  stroke: #F7958E;
+  stroke-width: 2px;
+}
+
+#e-pointer { transition: transform 0.7s; }
+body { background-color:#f7f7f7;}
+</style>
     <title>點名</title>
 </head>
 <body>
-
 <script language="JavaScript">
+      var week="3";
 
-      function RunSocket(){
+      function GO(url){
           $.ajax({
-              url: "http://140.134.26.196/socket/",
+              url: url,
               context: document.body,
               success: function(){
                   alert('ok...');
@@ -51,8 +172,12 @@
       function changecheck(changecheckstudent){
           console.log(changecheckstudent)
           $.ajax({
-              url: "http://140.134.26.196"+changecheckstudent,
+              url: "http://140.134.26.196"+changecheckstudent+"&week="+week,
               context: document.body,
+              success: function (data){
+                  alert(data.responsemessage);
+                  window.location.reload();
+              }
           });
       }
 
@@ -61,6 +186,11 @@
           $.ajax({
               url: "http://140.134.26.196"+changepointstudent,
               context: document.body,
+              data: this.data,
+              success: function (data){
+                  alert(data.responsemessage);
+                  window.location.reload();
+              }
           });
       }
 
@@ -69,125 +199,582 @@
               url: "http://140.134.26.196"+weekandgroup,
               context: document.body,
               data: this.data,
-              success: function (data){
-                  alert(data.my_string);
+              success: function (data) {
+                  alert(data.result);
                   jsnao.al_tts.setLanguage('Chinese');
-                  jsnao.al_tts.say(data.my_string.toString());
+                  jsnao.al_tts.say(data.result.toString());
+                  window.location.reload();
               }
           });
       }
 
+      function announceuncheckedstudent(url){
+          $.ajax({
+              url: "http://140.134.26.196"+url+week,
+              context: document.body,
+              data: this.data,
+              success: function (data){
+                  alert(data.result);
+                  jsnao.al_tts.setLanguage('Chinese');
+                  for(i=0; i<data.result.length; i++){
+                      jsnao.al_tts.say(data.result[i].toString()+"\\\\pau=3000\\\\");
+                      jsnao.al_tts.say(data.result[i].toString()+"\\\\pau=3000\\\\");
+                  }
+              },
+              error: function (data){
+                  alert(data.result);
+              }
+          });
+      }
+
+      function getstudentchecksituationforloop(url){
+          week=url.charAt(url.length-1);
+          for(group=1; group<7; group++){
+              getstudentchecksituation(url, String(group))
+          }
+      }
+
+      function getstudentchecksituation(url, group){
+              $.ajax({
+              url: url+"&group="+group,
+              context: document.body,
+              data: this.data,
+              success: function(data){
+                  document.getElementById("group"+group).getElementsByTagName("td")[2].innerHTML=data.check1+' <button onclick="changecheck(value)" value="/edit/?cId='+data.cId1+'"'+'>更動</button>'
+                  document.getElementById("group"+group).getElementsByTagName("td")[6].innerHTML=data.check2+' <button onclick="changecheck(value)" value="/edit/?cId='+data.cId2+'"'+'>更動</button>'
+                  document.getElementById("group"+group).getElementsByTagName("td")[10].innerHTML=data.check3+' <button onclick="changecheck(value)" value="/edit/?cId='+data.cId3+'"'+'>更動</button>'
+                  document.getElementById("group"+group).getElementsByTagName("td")[14].innerHTML=data.check4+' <button onclick="changecheck(value)" value="/edit/?cId='+data.cId4+'"'+'>更動</button>'
+                  document.getElementById("group"+group).getElementsByTagName("td")[18].innerHTML=data.check5+' <button onclick="changecheck(value)" value="/edit/?cId='+data.cId5+'"'+'>更動</button>'
+                  document.getElementById("group"+group).getElementsByTagName("td")[22].innerHTML=data.check6+' <button onclick="changecheck(value)" value="/edit/?cId='+data.cId6+'"'+'>更動</button>'
+              }
+              });
+
+      }
+
 </script>  <!-- functions -->
+<h1 align="center">
+    <button class="pickonestudent" onclick="randompickstudent(value)" value="/randompickstudent/?week=2&group=1">抽點第一組學生</button>
+    <button class="pickonestudent" onclick="randompickstudent(value)" value="/randompickstudent/?week=2&group=2">抽點第二組學生</button>
+    <button class="pickonestudent" onclick="randompickstudent(value)" value="/randompickstudent/?week=2&group=3">抽點第三組學生</button>
+    <button class="pickonestudent" onclick="randompickstudent(value)" value="/randompickstudent/?week=2&group=4">抽點第四組學生</button>
+    <button class="pickonestudent" onclick="randompickstudent(value)" value="/randompickstudent/?week=2&group=5">抽點第五組學生</button>
+    <button class="pickonestudent" onclick="randompickstudent(value)" value="/randompickstudent/?week=2&group=all">從全班抽點學生</button>
+</h1>
 
-<button onclick="RunSocket()"> Open socket and connect every zenbo junior !</button>  <!-- 開啟 socket (給zenbo junior 指令) -->
+    <table width="90%" align="left">
+        <caption style="font-size: 30px; font-family: 標楷體">
 
-    <table width="100%" align="center">
-        <caption style="font-size: 30px; font-family: 標楷體"> 各組學生名單 </caption>
+        <select onchange="GO(this.options[this.selectedIndex].value)">
+
+                <option value=""> 切換所有Zenbo狀態 </option>
+                <option value="http://140.134.26.196/changesectiontostudentcheck/?zenbo=all"> 點名 </option>
+
+                <option value="http://140.134.26.196/changesectiontobeforeyouread/?zenbo=all"> Before you read </option>
+
+                <option value="http://140.134.26.196/changesectiontovocabualrypreview/?unit=10&reading=1&zenbo=all"> Reading 1 Vocabulary Preview</option>
+
+                <option value="http://140.134.26.196/changesectiontofocusoncontent/?unit=10&reading=1&zenbo=all"> Reading 1 Focus on Content </option>
+
+                <option value="http://140.134.26.196/changesectiontovocabularyreview/?unit=10&reading=1&zenbo=all"> Reading 1 Vocabulary Review </option>
+
+                <option value="http://140.134.26.196/changesectiontovocabualrypreview/?unit=10&reading=2&zenbo=all"> Reading 2 Vocabulary Preview</option>
+
+                <option value="http://140.134.26.196/changesectiontofocusoncontent/?unit=10&reading=2&zenbo=all"> Reading 2 Focus on Content </option>
+
+                <option value="http://140.134.26.196/changesectiontovocabularyreview/?unit=10&reading=2&zenbo=all"> Reading 2 Vocabulary Review </option>
+
+                <option value="http://140.134.26.196/changesectiontocriticalthinking/?zenbo=all"> Critical thinking </option>
+        </select>
+        <select onchange="getstudentchecksituationforloop(this.options[this.selectedIndex].value)">
+
+                    <option value=""> Choose Week </option>
+
+                    <option value="http://140.134.26.196/getstudentchecksituation/?week=1"> Week 1 (5/5)</option>
+
+                    <option value="http://140.134.26.196/getstudentchecksituation/?week=2"> Week 2 (5/12)</option>
+
+                    <option value="http://140.134.26.196/getstudentchecksituation/?week=3"> Week 3 (5/19)</option>
+
+                    <option value="http://140.134.26.196/getstudentchecksituation/?week=4"> Week 4 (5/26)</option>
+        </select>
+        <button id="calluncheckedstudent" class="pickonestudent" onclick="announceuncheckedstudent(value)" value="/announceuncheckedstudent/?week=">唱名未簽到學生</button>
+        </caption>
         <colgroup style="background-color: #1b6d85;"></colgroup>
         <colgroup style="background-color: #f5dd5d;"></colgroup>
         <colgroup style="background-color: #3e8f3e;"></colgroup>
-        <colgroup style="background-color: #a41515;"></colgroup>
+
         <tr>
-            <th>第一組</th>
-            <th>第二組</th>
-            <th>第三組</th>
-            <th>第四組</th>
+            <th>Group 1</th>
+            <th>Group 2</th>
+            <th>Group 3</th>
         </tr>
 
     <form action="" method="GET" name="from1">
 
-    <table id="table1" width="25%" style="float: left;margin: 0px;padding: 0px" border="0">
-        <caption><br> <button onclick="randompickstudent(value)" value="/randompickstudent/?week=1&group=1">抽點一位學生</button>
-                    <br> ----------------------------------------- <br></caption>
+    <table id="group1" width="30%" style="float: left;margin: 0px;padding: 0px" border="0">
+        <caption><br>
+
+            <select onchange="GO(this.options[this.selectedIndex].value)">
+
+                <option value=""> 切換此Zenbo狀態 </option>
+                <option value="http://140.134.26.196/changesectiontostudentcheck/?zenbo=1"> 點名 </option>
+
+                <option value="http://140.134.26.196/changesectiontobeforeyouread/?zenbo=1"> Before you read </option>
+
+                <option value="http://140.134.26.196/changesectiontovocabualrypreview/?unit=10&reading=1&zenbo=1"> Reading 1 Vocabulary Preview</option>
+
+                <option value="http://140.134.26.196/changesectiontofocusoncontent/?unit=10&reading=1&zenbo=1"> Reading 1 Focus on Content </option>
+
+                <option value="http://140.134.26.196/changesectiontovocabularyreview/?unit=10&reading=1&zenbo=1"> Reading 1 Vocabulary Review </option>
+
+                <option value="http://140.134.26.196/changesectiontovocabualrypreview/?unit=10&reading=2&zenbo=1"> Reading 2 Vocabulary Preview</option>
+
+                <option value="http://140.134.26.196/changesectiontofocusoncontent/?unit=10&reading=2&zenbo=1"> Reading 2 Focus on Content </option>
+
+                <option value="http://140.134.26.196/changesectiontovocabularyreview/?unit=10&reading=2&zenbo=1"> Reading 2 Vocabulary Review </option>
+
+                <option value="http://140.134.26.196/changesectiontocriticalthinking/?zenbo=1"> Critical thinking </option>
+            </select>
+
+
+
+            <br> ----------------------------------------- <br></caption>
         <tr>
             <th>學號</th>
             <th>姓名</th>
             <th>簽到情形</th>
-            <th>分數更動</th>
+            <th>加扣分</th>
         </tr>
 
         {% for student in checkedstudent1 %}
             <tr>
                 <td align="center">{{ student.cId }}</td>
                 <td align="center">{{ student.cName }}</td>
-                <td align="center">{{ student.FirstweekCheck }} <button onclick="changecheck(value)" value="/edit/?cId={{student.cId}}">更動</button> </td>
-                <td align="center"><button onclick="changepoint(value)" value="/pluspoint/?cId={{student.cId}}">+</button>{{ student.point }} <button onclick="changepoint(value)" value="/subpoint/?cId={{student.cId}}">-</button></td>
-            </tr>
-        {% endfor %}
-
-    </table>
-
-    <form action="" method="GET" name="from1">
-
-    <table width="25%" style="float: left;margin: 0px;padding: 0px" border="0">
-        <caption><br> <button onclick="randompickstudent(value)" value="/randompickstudent/?week=1&group=1">抽點一位學生</button>
-            <br> ----------------------------------------- <br></caption>
-        <tr>
-            <th>學號</th>
-            <th>姓名</th>
-            <th>簽到情形</th>
-            <th>分數更動</th>
-        </tr>
-
-        {% for student in checkedstudent2 %}
-            <tr>
-                <td align="center">{{ student.cId }}</td>
-                <td align="center">{{ student.cName }}</td>
-                <td align="center">{{ student.FirstweekCheck }} <button onclick="changecheck(value)" value="/edit/?cId={{student.cId}}">更動</button> </td>
-                <td align="center"><button onclick="changepoint(value)" value="/pluspoint/?cId={{student.cId}}">+</button>{{ student.point }} <button onclick="changepoint(value)" value="/subpoint/?cId={{student.cId}}">-</button></td>
-            </tr>
-        {% endfor %}
-
-    </table>
-
-    <form action="" method="GET" name="from1">
-
-    <table width="25%" style="float: left;margin: 0px;padding: 0px" border="0">
-        <caption><br> <button onclick="randompickstudent(value)" value="/randompickstudent/?week=1&group=1">抽點一位學生</button>
-            <br> ----------------------------------------- <br></caption>
-        <tr>
-            <th>學號</th>
-            <th>姓名</th>
-            <th>簽到情形</th>
-            <th>分數更動</th>
-        </tr>
-
-        {% for student in checkedstudent3 %}
-            <tr>
-                <td align="center">{{ student.cId }}</td>
-                <td align="center">{{ student.cName }}</td>
-                <td align="center">{{ student.FirstweekCheck }} <button onclick="changecheck(value)" value="/edit/?cId={{student.cId}}">更動</button> </td>
-                <td align="center"><button onclick="changepoint(value)" value="/pluspoint/?cId={{student.cId}}">+</button>{{ student.point }} <button onclick="changepoint(value)" value="/subpoint/?cId={{student.cId}}">-</button></td>
-            </tr>
-        {% endfor %}
-
-    </table>
-
-    <form action="" method="GET" name="from1">
-
-    <table width="25%" style="float: left;margin: 0px;padding: 0px" border="0">
-        <caption><br> <button onclick="randompickstudent(value)" value="/randompickstudent/?week=1&group=1">抽點一位學生</button>
-            <br> ----------------------------------------- <br></caption>
-        <tr>
-            <th>學號</th>
-            <th>姓名</th>
-            <th>簽到情形</th>
-            <th>分數更動</th>
-        </tr>
-
-        {% for student in checkedstudent4 %}
-            <tr>
-                <td align="center">{{ student.cId }}</td>
-                <td align="center">{{ student.cName }}</td>
-                <td align="center">{{ student.FirstweekCheck }} <button onclick="changecheck(value)" value="/edit/?cId={{student.cId}}">更動</button> </td>
-                <td align="center"><button onclick="changepoint(value)" value="/pluspoint/?cId={{student.cId}}">+</button>{{ student.point }} <button onclick="changepoint(value)" value="/subpoint/?cId={{student.cId}}">-</button></td>
+                <td align="center">{{ student.Thirdweekcheck}} <button onclick="changecheck(value)" value="/edit/?cId={{student.cId}}">更動</button></td>
+                <td align="center"><button class="pluspoint" onclick="changepoint(value)" value="/pluspoint/?cId={{student.cId}}">+</button>        {{ student.point }}        <button class="minuspoint" onclick="changepoint(value)" value="/subpoint/?cId={{student.cId}}">-</button></td>
             </tr>
         {% endfor %}
 
     </table>
 
     </form>
+
+    <form action="" method="GET" name="from1">
+
+    <table id="group2" width="30%" style="float: left;margin: 0px;padding: 0px" border="0">
+        <caption><br>
+
+            <select onchange="GO(this.options[this.selectedIndex].value)">
+
+                <option value=""> 切換此Zenbo狀態 </option>
+                <option value="http://140.134.26.196/changesectiontostudentcheck/?zenbo=2"> 點名 </option>
+
+                <option value="http://140.134.26.196/changesectiontobeforeyouread/?zenbo=2"> Before you read </option>
+
+                <option value="http://140.134.26.196/changesectiontovocabualrypreview/?unit=10&reading=1&zenbo=2"> Reading 1 Vocabulary Preview</option>
+
+                <option value="http://140.134.26.196/changesectiontofocusoncontent/?unit=10&reading=1&zenbo=2"> Reading 1 Focus on Content </option>
+
+                <option value="http://140.134.26.196/changesectiontovocabularyreview/?unit=10&reading=1&zenbo=2"> Reading 1 Vocabulary Review </option>
+
+                <option value="http://140.134.26.196/changesectiontovocabualrypreview/?unit=10&reading=2&zenbo=2"> Reading 2 Vocabulary Preview</option>
+
+                <option value="http://140.134.26.196/changesectiontofocusoncontent/?unit=10&reading=2&zenbo=2"> Reading 2 Focus on Content </option>
+
+                <option value="http://140.134.26.196/changesectiontovocabularyreview/?unit=10&reading=2&zenbo=2"> Reading 2 Vocabulary Review </option>
+
+                <option value="http://140.134.26.196/changesectiontocriticalthinking/?zenbo=2"> Critical thinking </option>
+            </select>
+
+
+
+            <br> ----------------------------------------- <br></caption>
+        <tr>
+            <th>學號</th>
+            <th>姓名</th>
+            <th>簽到情形</th>
+            <th>加扣分</th>
+        </tr>
+
+        {% for student in checkedstudent2 %}
+            <tr>
+                <td align="center">{{ student.cId }}</td>
+                <td align="center">{{ student.cName }}</td>
+                <td align="center">{{ student.Thirdweekcheck}} <button onclick="changecheck(value)" value="/edit/?cId={{student.cId}}">更動</button></td>
+                <td align="center"><button class="pluspoint" onclick="changepoint(value)" value="/pluspoint/?cId={{student.cId}}">+</button>        {{ student.point }}        <button class="minuspoint" onclick="changepoint(value)" value="/subpoint/?cId={{student.cId}}">-</button></td>
+            </tr>
+        {% endfor %}
+
     </table>
+
+    </form>
+
+    <form action="" method="GET" name="from1">
+
+    <table id="group3" width="30%" style="float: left;margin: 0px;padding: 0px" border="0">
+        <caption><br>
+
+            <select onchange="GO(this.options[this.selectedIndex].value)">
+
+                <option value=""> 切換此Zenbo狀態 </option>
+                <option value="http://140.134.26.196/changesectiontostudentcheck/?zenbo=3"> 點名 </option>
+
+                <option value="http://140.134.26.196/changesectiontobeforeyouread/?zenbo=3"> Before you read </option>
+
+                <option value="http://140.134.26.196/changesectiontovocabualrypreview/?unit=10&reading=1&zenbo=3"> Reading 1 Vocabulary Preview</option>
+
+                <option value="http://140.134.26.196/changesectiontofocusoncontent/?unit=10&reading=1&zenbo=3"> Reading 1 Focus on Content </option>
+
+                <option value="http://140.134.26.196/changesectiontovocabularyreview/?unit=10&reading=1&zenbo=3"> Reading 1 Vocabulary Review </option>
+
+                <option value="http://140.134.26.196/changesectiontovocabualrypreview/?unit=10&reading=2&zenbo=3"> Reading 2 Vocabulary Preview</option>
+
+                <option value="http://140.134.26.196/changesectiontofocusoncontent/?unit=10&reading=2&zenbo=3"> Reading 2 Focus on Content </option>
+
+                <option value="http://140.134.26.196/changesectiontovocabularyreview/?unit=10&reading=2&zenbo=3"> Reading 2 Vocabulary Review </option>
+
+                <option value="http://140.134.26.196/changesectiontocriticalthinking/?zenbo=3"> Critical thinking </option>
+            </select>
+
+
+
+            <br> ----------------------------------------- <br></caption>
+        <tr>
+            <th>學號</th>
+            <th>姓名</th>
+            <th>簽到情形</th>
+            <th>加扣分</th>
+        </tr>
+
+        {% for student in checkedstudent3 %}
+            <tr>
+                <td align="center">{{ student.cId }}</td>
+                <td align="center">{{ student.cName }}</td>
+                <td align="center">{{ student.Thirdweekcheck}} <button onclick="changecheck(value)" value="/edit/?cId={{student.cId}}">更動</button></td>
+                <td align="center"><button class="pluspoint" onclick="changepoint(value)" value="/pluspoint/?cId={{student.cId}}">+</button>        {{ student.point }}        <button class="minuspoint" onclick="changepoint(value)" value="/subpoint/?cId={{student.cId}}">-</button></td>
+            </tr>
+        {% endfor %}
+
+    </table>
+
+    </form>
+    <br><br>
+    </table>
+
+    <table width="90%" align="left">
+        <colgroup style="background-color: #d9534f;"></colgroup>
+        <colgroup style="background-color: #d58512;"></colgroup>
+        <colgroup style="background-color: #9acfea;"></colgroup>
+        <tr>
+            <th>Group 4</th>
+            <th>Group 5</th>
+            <th>Group 6</th>
+        </tr>
+
+    <form action="" method="GET" name="from1">
+
+    <table id="group4" width="30%" style="float: left;margin: 0px;padding: 0px" border="0">
+        <caption><br>
+
+            <select onchange="GO(this.options[this.selectedIndex].value)">
+
+                <option value=""> 切換此Zenbo狀態 </option>
+                <option value="http://140.134.26.196/changesectiontostudentcheck/?zenbo=4"> 點名 </option>
+
+                <option value="http://140.134.26.196/changesectiontobeforeyouread/?zenbo=4"> Before you read </option>
+
+                <option value="http://140.134.26.196/changesectiontovocabualrypreview/?unit=10&reading=1&zenbo=4"> Reading 1 Vocabulary Preview</option>
+
+                <option value="http://140.134.26.196/changesectiontofocusoncontent/?unit=10&reading=1&zenbo=4"> Reading 1 Focus on Content </option>
+
+                <option value="http://140.134.26.196/changesectiontovocabularyreview/?unit=10&reading=1&zenbo=4"> Reading 1 Vocabulary Review </option>
+
+                <option value="http://140.134.26.196/changesectiontovocabualrypreview/?unit=10&reading=2&zenbo=4"> Reading 2 Vocabulary Preview</option>
+
+                <option value="http://140.134.26.196/changesectiontofocusoncontent/?unit=10&reading=2&zenbo=4"> Reading 2 Focus on Content </option>
+
+                <option value="http://140.134.26.196/changesectiontovocabularyreview/?unit=10&reading=2&zenbo=4"> Reading 2 Vocabulary Review </option>
+
+                <option value="http://140.134.26.196/changesectiontocriticalthinking/?zenbo=4"> Critical thinking </option>
+            </select>
+
+
+
+            <br> ----------------------------------------- <br></caption>
+        <tr>
+            <th>學號</th>
+            <th>姓名</th>
+            <th>簽到情形</th>
+            <th>加扣分</th>
+        </tr>
+
+        {% for student in checkedstudent4 %}
+            <tr>
+                <td align="center">{{ student.cId }}</td>
+                <td align="center">{{ student.cName }}</td>
+                <td align="center">{{ student.Thirdweekcheck}} <button onclick="changecheck(value)" value="/edit/?cId={{student.cId}}">更動</button></td>
+                <td align="center"><button class="pluspoint" onclick="changepoint(value)" value="/pluspoint/?cId={{student.cId}}">+</button>        {{ student.point }}        <button class="minuspoint" onclick="changepoint(value)" value="/subpoint/?cId={{student.cId}}">-</button></td>
+            </tr>
+        {% endfor %}
+
+    </table>
+
+    </form>
+
+    <form action="" method="GET" name="from1">
+
+    <table id="group5" width="30%" style="float: left;margin: 0px;padding: 0px" border="0">
+        <caption><br>
+
+            <select onchange="GO(this.options[this.selectedIndex].value)">
+
+                <option value=""> 切換此Zenbo狀態 </option>
+                <option value="http://140.134.26.196/changesectiontostudentcheck/?zenbo=5"> 點名 </option>
+
+                <option value="http://140.134.26.196/changesectiontobeforeyouread/?zenbo=5"> Before you read </option>
+
+                <option value="http://140.134.26.196/changesectiontovocabualrypreview/?unit=10&reading=1&zenbo=5"> Reading 1 Vocabulary Preview</option>
+
+                <option value="http://140.134.26.196/changesectiontofocusoncontent/?unit=10&reading=1&zenbo=5"> Reading 1 Focus on Content </option>
+
+                <option value="http://140.134.26.196/changesectiontovocabularyreview/?unit=10&reading=1&zenbo=5"> Reading 1 Vocabulary Review </option>
+
+                <option value="http://140.134.26.196/changesectiontovocabualrypreview/?unit=10&reading=2&zenbo=5"> Reading 2 Vocabulary Preview</option>
+
+                <option value="http://140.134.26.196/changesectiontofocusoncontent/?unit=10&reading=2&zenbo=5"> Reading 2 Focus on Content </option>
+
+                <option value="http://140.134.26.196/changesectiontovocabularyreview/?unit=10&reading=2&zenbo=5"> Reading 2 Vocabulary Review </option>
+
+                <option value="http://140.134.26.196/changesectiontocriticalthinking/?zenbo=5"> Critical thinking </option>
+            </select>
+
+
+
+            <br> ----------------------------------------- <br></caption>
+        <tr>
+            <th>學號</th>
+            <th>姓名</th>
+            <th>簽到情形</th>
+            <th>加扣分</th>
+        </tr>
+
+        {% for student in checkedstudent5 %}
+            <tr>
+                <td align="center">{{ student.cId }}</td>
+                <td align="center">{{ student.cName }}</td>
+                <td align="center">{{ student.Thirdweekcheck}} <button onclick="changecheck(value)" value="/edit/?cId={{student.cId}}">更動</button></td>
+                <td align="center"><button class="pluspoint" onclick="changepoint(value)" value="/pluspoint/?cId={{student.cId}}">+</button>        {{ student.point }}        <button class="minuspoint" onclick="changepoint(value)" value="/subpoint/?cId={{student.cId}}">-</button></td>
+            </tr>
+        {% endfor %}
+
+    </table>
+
+    </form>
+
+    <form action="" method="GET" name="from1">
+
+    <table id="group6" width="30%" style="float: left;margin: 0px;padding: 0px" border="0">
+        <caption><br> <button class="pickonestudent" onclick="randompickstudent(value)" value="/randompickstudent/?week=1&group=6">抽點一位學生</button>
+
+            <select onchange="GO(this.options[this.selectedIndex].value)">
+
+                <option value=""> 切換此Zenbo狀態 </option>
+                <option value="http://140.134.26.196/changesectiontostudentcheck/?zenbo=6"> 點名 </option>
+
+                <option value="http://140.134.26.196/changesectiontobeforeyouread/?zenbo=6"> Before you read </option>
+
+                <option value="http://140.134.26.196/changesectiontovocabualrypreview/?unit=10&reading=1&zenbo=6"> Reading 1 Vocabulary Preview</option>
+
+                <option value="http://140.134.26.196/changesectiontofocusoncontent/?unit=10&reading=1&zenbo=6"> Reading 1 Focus on Content </option>
+
+                <option value="http://140.134.26.196/changesectiontovocabularyreview/?unit=10&reading=1&zenbo=6"> Reading 1 Vocabulary Review </option>
+
+                <option value="http://140.134.26.196/changesectiontovocabualrypreview/?unit=10&reading=2&zenbo=6"> Reading 2 Vocabulary Preview</option>
+
+                <option value="http://140.134.26.196/changesectiontofocusoncontent/?unit=10&reading=2&zenbo=6"> Reading 2 Focus on Content </option>
+
+                <option value="http://140.134.26.196/changesectiontovocabularyreview/?unit=10&reading=2&zenbo=6"> Reading 2 Vocabulary Review </option>
+
+                <option value="http://140.134.26.196/changesectiontocriticalthinking/?zenbo=6"> Critical thinking </option>
+            </select>
+
+
+
+            <br> ----------------------------------------- <br></caption>
+        <tr>
+            <th>學號</th>
+            <th>姓名</th>
+            <th>簽到情形</th>
+            <th>加扣分</th>
+        </tr>
+
+        {% for student in checkedstudent6 %}
+            <tr>
+                <td align="center">{{ student.cId }}</td>
+                <td align="center">{{ student.cName }}</td>
+                <td align="center">{{ student.Thirdweekcheck}} <button onclick="changecheck(value)" value="/edit/?cId={{student.cId}}">更動</button></td>
+                <td align="center"><button class="pluspoint" onclick="changepoint(value)" value="/pluspoint/?cId={{student.cId}}">+</button>        {{ student.point }}        <button class="minuspoint" onclick="changepoint(value)" value="/subpoint/?cId={{student.cId}}">-</button></td>
+            </tr>
+        {% endfor %}
+
+    </table>
+
+    </form>
+    <br><br>
+    </table>
+
+<div class="container">
+  <div class="setters">
+    <div class="minutes-set">
+      <button data-setter="minutes-plus">+</button>
+      <button data-setter="minutes-minus">-</button>
+    </div>
+    <div class="seconds-set">
+      <button data-setter="seconds-plus">+</button>
+      <button data-setter="seconds-minus">-</button>
+    </div>
+  </div>
+  <div class="circle"> <svg width="300" viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+    <g transform="translate(110,110)">
+      <circle r="100" class="e-c-base"/>
+      <g transform="rotate(-90)">
+        <circle r="100" class="e-c-progress"/>
+        <g id="e-pointer">
+          <circle cx="100" cy="0" r="8" class="e-c-pointer"/>
+        </g>
+      </g>
+    </g>
+    </svg> </div>
+  <div class="controlls">
+    <div class="display-remain-time">00:30</div>
+    <button class="play" id="pause"></button>
+  </div>
+</div>
+<script>
+//circle start
+let progressBar = document.querySelector('.e-c-progress');
+let indicator = document.getElementById('e-indicator');
+let pointer = document.getElementById('e-pointer');
+let length = Math.PI * 2 * 100;
+
+progressBar.style.strokeDasharray = length;
+
+function update(value, timePercent) {
+	var offset = - length - length * value / (timePercent);
+	progressBar.style.strokeDashoffset = offset;
+	pointer.style.transform = `rotate(${360 * value / (timePercent)}deg)`;
+};
+
+//circle ends
+const displayOutput = document.querySelector('.display-remain-time')
+const pauseBtn = document.getElementById('pause');
+const setterBtns = document.querySelectorAll('button[data-setter]');
+
+let intervalTimer;
+let timeLeft;
+let wholeTime = 0.5 * 60; // manage this to set the whole time
+let isPaused = false;
+let isStarted = false;
+
+
+update(wholeTime,wholeTime); //refreshes progress bar
+displayTimeLeft(wholeTime);
+
+function changeWholeTime(seconds){
+  if ((wholeTime + seconds) > 0){
+    wholeTime += seconds;
+    update(wholeTime,wholeTime);
+  }
+}
+
+for (var i = 0; i < setterBtns.length; i++) {
+    setterBtns[i].addEventListener("click", function(event) {
+        var param = this.dataset.setter;
+        switch (param) {
+            case 'minutes-plus':
+                changeWholeTime(1 * 60);
+                break;
+            case 'minutes-minus':
+                changeWholeTime(-1 * 60);
+                break;
+            case 'seconds-plus':
+                changeWholeTime(1);
+                break;
+            case 'seconds-minus':
+                changeWholeTime(-1);
+                break;
+        }
+      displayTimeLeft(wholeTime);
+    });
+}
+
+function timer (seconds){ //counts time, takes seconds
+  let remainTime = Date.now() + (seconds * 1000);
+  displayTimeLeft(seconds);
+
+  intervalTimer = setInterval(function(){
+    timeLeft = Math.round((remainTime - Date.now()) / 1000);
+    if(timeLeft < 0){
+      clearInterval(intervalTimer);
+      isStarted = false;
+      setterBtns.forEach(function(btn){
+        btn.disabled = false;
+        btn.style.opacity = 1;
+      });
+      displayTimeLeft(wholeTime);
+      pauseBtn.classList.remove('pause');
+      pauseBtn.classList.add('play');
+      return ;
+    }
+    displayTimeLeft(timeLeft);
+  }, 1000);
+}
+function pauseTimer(event){
+  if(isStarted === false){
+    timer(wholeTime);
+    isStarted = true;
+    this.classList.remove('play');
+    this.classList.add('pause');
+
+    setterBtns.forEach(function(btn){
+      btn.disabled = true;
+      btn.style.opacity = 0.5;
+    });
+
+  }else if(isPaused){
+    this.classList.remove('play');
+    this.classList.add('pause');
+    timer(timeLeft);
+    isPaused = isPaused ? false : true
+  }else{
+    this.classList.remove('pause');
+    this.classList.add('play');
+    clearInterval(intervalTimer);
+    isPaused = isPaused ? false : true ;
+  }
+}
+
+function displayTimeLeft (timeLeft){ //displays time on the input
+  let minutes = Math.floor(timeLeft / 60);
+  let seconds = timeLeft % 60;
+  let displayString = `${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+  displayOutput.textContent = displayString;
+  update(timeLeft, wholeTime);
+}
+
+pauseBtn.addEventListener('click',pauseTimer);
+
+</script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-46156385-1', 'cssscript.com');
+  ga('send', 'pageview');
+
+</script>
 
 </body>
 </html>

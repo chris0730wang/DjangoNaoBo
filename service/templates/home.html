@@ -1,0 +1,135 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+  <link rel="stylesheet"  type="text/css" href="{%  static  'css/style.css'  %}">
+  <script>
+    getnaoip();
+    var naoiptoconnect="";
+    function getnaoip(){
+        $.ajax({
+              url: "http://140.134.26.196/getnaoip/",
+              context: document.body,
+              success: function(data){
+                  document.getElementById("NaoIP").innerHTML="Nao IP : "+data.IP;
+              }
+          });
+    }
+  </script>
+<meta charset="utf8">
+  <title>Multi-Robot System in english education classroom</title>
+</head>
+<body>
+<h2 id="NaoIP">Nao IP :</h2>
+<script language="JavaScript">
+
+      // function changesectiontostudentcheck(){
+      //     $.ajax({
+      //         url: "http://140.134.26.196/changesectiontostudentcheck/",
+      //         context: document.body,
+      //         success: function(){
+      //             alert('ok...');
+      //         }
+      //     });
+      // }
+      //
+      // function changesectiontobeforeyouread(){
+      //     $.ajax({
+      //         url: "http://140.134.26.196/changesectiontobeforeyouread/",
+      //         context: document.body,
+      //         success: function(){
+      //             alert('ok...');
+      //         }
+      //     });
+      // }
+
+      function changesectiontovocabualrypreview(unitandreading){
+          $.ajax({
+              url: "http://140.134.26.196/changesectiontovocabualrypreview/?"+unitandreading,
+              context: document.body,
+              success: function(){
+                  alert('ok...');
+              }
+          });
+      }
+
+      function changesectiontofocusoncontent(unitandreading){
+          $.ajax({
+              url: "http://140.134.26.196/changesectiontofocusoncontent/?"+unitandreading,
+              context: document.body,
+              success: function(){
+                  alert('ok...');
+              }
+          });
+      }
+
+      function changesectiontovocabularyreview(unitandreading){
+          $.ajax({
+              url: "http://140.134.26.196/changesectiontovocabularyreview/?"+unitandreading,
+              context: document.body,
+              success: function(){
+                  alert('ok...');
+              }
+          });
+      }
+
+
+</script>
+
+<!--  <h1>Students</h1>-->
+<!--  <iframe src="http://140.134.26.196/checkstudent/" style="width: 100%; height: 700px" scrolling="auto" marginwidth="0" marginheight="0" frameborder="0" vspace="0" hspace="0">-->
+<!--  </iframe>-->
+
+  <h1>Before You Read</h1>
+  <form name="change">
+  <SELECT NAME="options" ONCHANGE="document.getElementById('beforeyouread').src = this.options[this.selectedIndex].value" style="vertical-align:text-top;">
+  <option>Select unit</option>
+  <option value="http://140.134.26.196/beforeyoureadresult/?unit=10">Unit 10</option>
+  </SELECT>
+  <br>
+  <iframe name="iframe" id="beforeyouread" style="width: 100%; height: 350px" scrolling="auto" marginwidth="0" marginheight="0" frameborder="0" vspace="0" hspace="50"></iframe>
+  </form>
+
+  <h1>Vocabulary Preview</h1>
+
+  <form name="change">
+  <SELECT NAME="options" ONCHANGE="document.getElementById('vocabularypreview').src = this.options[this.selectedIndex].value" style="vertical-align:text-top;">
+  <option>Select unit and reading</option>
+  <option value="http://140.134.26.196/vocabularypreviewresult/?unit=10&reading=1">Unit 10 Reading 1</option>
+  <option value="http://140.134.26.196/vocabularypreviewresult/?unit=10&reading=2">Unit 10 Reading 2</option>
+  </SELECT>
+  <br>
+  <iframe name="iframe" id="vocabularypreview" style="width: 100%; height: 400px" scrolling="auto" marginwidth="0" marginheight="0" frameborder="0" vspace="0" hspace="50"></iframe>
+  </form>
+
+  <h1>Reading </h1>
+  <br>
+  <iframe name="iframe" src="http://140.134.26.196/reading/?unit=10&reading=1" style="width: 100%; height: 100px" scrolling="auto" marginwidth="0" marginheight="0" frameborder="0" vspace="0" hspace="50"></iframe>
+
+  <h1>Focus on Content</h1>
+  <form name="change">
+  <SELECT NAME="options" ONCHANGE="document.getElementById('focusoncontent').src = this.options[this.selectedIndex].value" style="vertical-align:text-top;">
+  <option>Select unit and reading</option>
+  <option value="http://140.134.26.196/focusoncontentresult/?unit=10&reading=1">Unit 10 Reading 1</option>
+  <option value="http://140.134.26.196/focusoncontentresult/?unit=10&reading=2">Unit 10 Reading 2</option>
+  </SELECT>
+  <br>
+  <iframe name="iframe" id="focusoncontent" style="width: 100%; height: 300px" scrolling="auto" marginwidth="0" marginheight="0" frameborder="0" vspace="0" hspace="50"></iframe>
+  </form>
+
+
+  <h1>Vocabulary Review </h1>
+  <form name="change">
+  <SELECT NAME="options" ONCHANGE="document.getElementById('vocabularyreview').src = this.options[this.selectedIndex].value" style="vertical-align:text-top;">
+  <option>Select unit and reading</option>
+  <option value="http://140.134.26.196/vocabularyreviewresult/?unit=10&reading=1">Unit 10 Reading 1</option>
+  <option value="http://140.134.26.196/vocabularyreviewresult/?unit=10&reading=2">Unit 10 Reading 2</option>
+  </SELECT>
+  <br>
+  <iframe name="iframe" id="vocabularyreview" style="width: 100%; height: 400px" scrolling="auto" marginwidth="0" marginheight="0" frameborder="0" vspace="0" hspace="50"></iframe>
+  </form>
+
+
+</body>
+</html>

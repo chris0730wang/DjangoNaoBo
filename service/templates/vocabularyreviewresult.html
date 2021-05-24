@@ -70,13 +70,14 @@
           });
         }
     </script>
-    <title>U?R? vocabulary preview </title>
+
+    <title>U?R? vocabulary Review </title>
 </head>
 <body>
 <table id="table1" width="90%" style="float: left;margin: 0px;padding: 0px" border="1">
-        <caption>Unit {{unit}} Reading {{reading}} Vocabulary Preview Result<br><br>-----------------------------------------------<br>
-            <button onclick="naoannounceresult(value)" value="/announcevocabularypreview/?unit={{unit}}&reading={{reading}}">Nao announcement</button>
-            <button onclick="window.open(' http://140.134.26.196/vocabularypreviewdetail/?unit={{unit}}&reading={{reading}}', 'Vocabulary Preview Detail', config='height=500,width=1000');">Each Group Detailed</button>
+        <caption>Unit {{unit}} Reading {{reading}} Vocabulary Review Result<br><br>-----------------------------------------------<br>
+            <button onclick="naoannounceresult(value)" value="/announcevocabularyreview/?unit={{unit}}&reading={{reading}}">Nao announcement</button>
+            <button onclick="window.open(' http://140.134.26.196/vocabularyreviewdetail/?unit={{unit}}&reading={{reading}}', 'Vocabulary Review Detail', config='height=500,width=1000');">Each Group Detailed</button>
             <br></caption>
         <tr>
             <th>題號</th>
@@ -92,9 +93,9 @@
             <tr>
                 <td align="center">{{ correctans.questionnum }}</td>
                 <td align="center">{{ correctans.question }}</td>
-                <td align="center">{{ correctans.option1 }} <div style="float:right">({{correctans.numof1}})</div></td>
-                <td align="center">{{ correctans.option2 }} <div style="float:right">({{correctans.numof2}})</div></td>
-                <td align="center">{{ correctans.option3 }} <div style="float:right">({{correctans.numof3}})</div></td>
+                <td align="center">{{ correctans.option1 }} <div style="float:right">({{  correctans.numof1  }})</div></td>
+                <td align="center">{{ correctans.option2 }} <div style="float:right">({{  correctans.numof2  }})</div></td>
+                <td align="center">{{ correctans.option3 }} <div style="float:right">({{  correctans.numof3  }})</div></td>
                 <td align="center">{{ correctans.correctans }}</td>
                 <td align="center">{{ correctans.falsepercent }}%</td>
             </tr>

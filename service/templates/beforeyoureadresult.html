@@ -1,10 +1,141 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="stylesheet"  type="text/css" href="{%  static  'css/style.css'  %}">
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="{% static 'js/socket.io.min.js' %}"></script>
+
+    <script type="text/javascript">
+    getnaoip();
+    var naoiptoconnect="";
+    function getnaoip(){
+        $.ajax({
+              url: "http://140.134.26.196/getnaoip/",
+              context: document.body,
+              success: function(data){
+                  naoiptoconnect=data.IP;
+              }
+          });
+    }
+    var nao_address = "192.168.0.101";
+    var jsQim = '/static/js/qimessaging.js';
+    if (nao_address == '') {
+        nao_address = '10.2.1.164';
+        jsQim = 'http://' + nao_address + jsQim;
+    }
+    $.getScript(jsQim, function() {
+        console.log('QiMessaging Library Loaded');
+        $.getScript('/static/js/jsnao.js', function() {
+        console.log('JsNAO Library Loaded');
+        $(document).ready(function() {
+            jsnao.connect(naoiptoconnect);
+            $('#RbtSay').keyup(function (e){
+            if (e.keyCode == 13 /* Enter */) {
+                jsnao.al_tts.say($('#RbtSay').val());
+            }
+            });
+        });
+        });
+    });
+    </script> <!-- nao 連線 -->
+
+    <script type="text/javascript">
+
+        Array.prototype.max = function () {
+            // 將陣列第一個元素的值賦給max
+            var max = this[0];
+            // 使用for 迴圈從陣列第一個值開始做遍歷
+            for (var i = 1; i < this.length; i++) {
+            // 如果元素當前值大於max,就把這個當前值賦值給max
+                if (this[i] > max) {
+                    max = this[i];
+                }
+            }
+            // 返回最大的值
+            return max;
+        }
+
+        function naoannounceresult(unit){
+            $.ajax({
+              url: "http://140.134.26.196"+unit,
+              context: document.body,
+              data: this.data,
+              success: function (data){
+                  jsnao.al_ats.setBodyLanguageMode(2);
+                  jsnao.al_tts.setLanguage('English');
+                  jsnao.al_tts.setParameter("speed", 80)
+
+                  for(i=0; i<4;i++){
+                      var Qoptionsnum = [data.Qnumof1[i], data.Qnumof2[i], data.Qnumof3[i], data.Qnumof4[i], data.Qnumof5[i]]
+                      console.log(Qoptionsnum);
+                      jsnao.al_tts.say("Question"+data.QNumber[i].toString());
+                      jsnao.al_tts.say("\\\\pau=1500\\\\");
+                      jsnao.al_tts.say(data.QQuestion[i].toString());
+                      if(Qoptionsnum.max() === data.Qnumof1[i]){
+                          jsnao.al_tts.say("\\\\pau=2000\\\\The option most selected by students is option 1 \\\\pau=500\\\\"+data.Qoption1[i]+"\\\\pau=2000\\\\");
+                      }
+                      else if(Qoptionsnum.max() === data.Qnumof2[i]){
+                          jsnao.al_tts.say("\\\\pau=2000\\\\The option most selected by students is option 2 \\\\pau=500\\\\"+data.Qoption2[i]+"\\\\pau=2000\\\\");
+                      }
+                      else if(Qoptionsnum.max() === data.Qnumof3[i]){
+                          jsnao.al_tts.say("\\\\pau=2000\\\\The option most selected by students is option 3 \\\\pau=500\\\\"+data.Qoption3[i]+"\\\\pau=2000\\\\");
+                      }
+                      else if(Qoptionsnum.max() === data.Qnumof4[i]){
+                          jsnao.al_tts.say("\\\\pau=2000\\\\The option most selected by students is option 4 \\\\pau=500\\\\"+data.Qoption4[i]+"\\\\pau=2000\\\\");
+                      }
+                      else if(Qoptionsnum.max() === data.Qnumof5[i]){
+                          jsnao.al_tts.say("\\\\pau=2000\\\\The option most selected by students is option 5 \\\\pau=500\\\\"+data.Qoption5[i]+"\\\\pau=2000\\\\");
+                      }
+                  }
+              }
+          });
+        }
+
+        function RunSocket(){
+          $.ajax({
+              url: "http://140.134.26.196/changesectiontobeforeyouread/?unit=10",
+              context: document.body,
+              success: function(){
+                  alert('ok...');
+              }
+          });
+      }
+
+    </script>
     <title>Title</title>
 </head>
 <body>
+<table id="table1" width="90%" style="float: left;margin: 0px;padding: 0px" border="1">
+        <caption>Unit {{unit}} Before You Read Result<br><br>-----------------------------------------------<br>
+
+            <button onclick="naoannounceresult(value)" value="/announcebeforeyouread/?unit=10">Nao announcement</button>
+
+            <br></caption>
+        <tr>
+            <th>題號</th>
+            <th>題目</th>
+            <th>選項一</th>
+            <th>選項二</th>
+            <th>選項三</th>
+            <th>選項四</th>
+            <th>選項五</th>
+        </tr>
+
+        {% for question in questionset %}
+            <tr>
+                <td align="center">{{ question.number }}</td>
+                <td align="left">{{ question.question }}</td>
+                <td align="left">{{ question.option1 }} <div style="float:right">({{question.numof1}})</div></td>
+                <td align="left">{{ question.option2 }} <div style="float:right">({{question.numof2}})</div></td>
+                <td align="left">{{ question.option3 }} <div style="float:right">({{question.numof3}})</div></td>
+                <td align="left">{{ question.option4 }} <div style="float:right">({{question.numof4}})</div></td>
+                <td align="left">{{ question.option5 }} <div style="float:right">({{question.numof5}})</div></td>
+            </tr>
+        {% endfor %}
+
+    </table>
 
 </body>
 </html>

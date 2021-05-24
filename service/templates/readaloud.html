@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <link rel="stylesheet"  href="{%  static  'css/style.css'  %}">
+    <script src="{% static 'js/socket.io.min.js' %}"></script>
+    <title>Reading</title>
+
+    <script type="text/javascript">
+    getnaoip();
+    var naoiptoconnect="";
+    function getnaoip(){
+        $.ajax({
+              url: "http://140.134.26.196/getnaoip/",
+              context: document.body,
+              success: function(data){
+                  naoiptoconnect=data.IP;
+              }
+          });
+    }
+    var nao_address = "192.168.0.101";
+    var jsQim = '/static/js/qimessaging.js';
+    if (nao_address == '') {
+        nao_address = '10.2.1.164';
+        jsQim = 'http://' + nao_address + jsQim;
+    }
+    $.getScript(jsQim, function() {
+        console.log('QiMessaging Library Loaded');
+        $.getScript('/static/js/jsnao.js', function() {
+        console.log('JsNAO Library Loaded');
+        $(document).ready(function() {
+            jsnao.connect(naoiptoconnect);
+            $('#RbtSay').keyup(function (e){
+            if (e.keyCode == 13 /* Enter */) {
+                jsnao.al_tts.say($('#RbtSay').val());
+            }
+            });
+        });
+        });
+    });
+    </script> <!-- nao 連線 -->
+
+    <script>
+        var starttime, stoptime;
+        var taskid=0, currentposition, fileplaying;
+        function playFile(file){
+            starttime = Date.now();
+            if (file===1) {
+                taskid = jsnao.al_audio.playFile("/var/persistent/home/nao/2021Audiofile/19-1.wav");
+            }
+            else if (file===2) jsnao.al_audio.playFile("/var/persistent/home/nao/2021Audiofile/19-2.mp3");
+            else if (file===3) jsnao.al_audio.playFile("/var/persistent/home/nao/2021Audiofile/19-3.mp3");
+            else if (file===4) jsnao.al_audio.playFile("/var/persistent/home/nao/2021Audiofile/19-4.mp3");
+            else if (file===5) jsnao.al_audio.playFile("/var/persistent/home/nao/2021Audiofile/19-5.mp3");
+            else if (file===6) jsnao.al_audio.playFile("/var/persistent/home/nao/2021Audiofile/19-6.mp3");
+            else if (file===7) jsnao.al_audio.playFile("/var/persistent/home/nao/2021Audiofile/20-1.mp3");
+            else if (file===8) jsnao.al_audio.playFile("/var/persistent/home/nao/2021Audiofile/20-2.mp3");
+            else if (file===9) jsnao.al_audio.playFile("/var/persistent/home/nao/2021Audiofile/20-3.mp3");
+            else if (file===10) jsnao.al_audio.playFile("/var/persistent/home/nao/2021Audiofile/20-4.mp3");
+            else if (file===11) jsnao.al_audio.playFile("/var/persistent/home/nao/2021Audiofile/20-5.mp3");
+            else if (file===12) jsnao.al_audio.playFile("/var/persistent/home/nao/2021Audiofile/20-6.mp3");
+        }
+
+        function stop(){
+            stoptime = Date.now();
+            currentposition = jsnao.al_audio.getCurrentPosition(taskid);
+            console.log(currentposition);
+            jsnao.al_audio.stopAll();
+        }
+
+        function continuefile(){
+            jsnao.al_audio.playFileFromPosition(fileplaying,2.5);
+        }
+    </script>
+</head>
+<body>
+
+<button onclick="playFile(1)"> Reading 1 Part 1 </button>
+<!--<button onclick="stop()"> Reading 1 Part 1 stop </button>-->
+<!--<button onclick="continuefile()"> Reading 1 Part 1 continue </button>-->
+<button onclick="playFile(2)"> Reading 1 Part 2 </button>
+<button onclick="playFile(3)"> Reading 1 Part 3 </button>
+<button onclick="playFile(4)"> Reading 1 Part 4 </button>
+<button onclick="playFile(5)"> Reading 1 Part 5 </button>
+<button onclick="playFile(6)"> Reading 1 Part 6 </button>
+<br>
+<br>
+<button onclick="playFile(7)"> Reading 2 Part 1 </button>
+<button onclick="playFile(8)"> Reading 2 Part 2 </button>
+<button onclick="playFile(9)"> Reading 2 Part 3 </button>
+<button onclick="playFile(10)"> Reading 2 Part 4 </button>
+<button onclick="playFile(11)"> Reading 2 Part 5 </button>
+<button onclick="playFile(12)"> Reading 2 Part 6 </button>
+</body>
+</html>

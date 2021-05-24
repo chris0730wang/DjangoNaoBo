@@ -4,22 +4,27 @@ var jsnao = {
   sname : null,
   coords : { x: 0, y: 0},
   session : null,
+  sessionsuccess : null,
+  naoip : null,
   al_sys : null,
   al_tts : null,
+  al_ats : null,
   al_video : null,
   al_motion : null,
   al_posture : null,
   al_led : null,
+  al_autonomous : null,
+  al_audio : null,
   log_listener : null,
   log_level : 4,
   error : function(data) { console.log(data) },
   connect : function(address) {
     console.log('Create Session to : '+address);
     jsnao.session = new QiSession(address);
-    jsnao.session.socket().on('connect', jsnao.connected);
+    jsnao.session.socket().on('connect', jsnao.connected(address));
     jsnao.session.socket().on('disconnect', jsnao.disconnected);
   },
-  connected : function() {
+  connected : function(address) {
     console.log('Session Connected.');
     jsnao.session.service("ALSystem").done(jsnao.init_system);
     jsnao.session.service("ALMotion").done(jsnao.init_motion);
@@ -27,6 +32,9 @@ var jsnao = {
     jsnao.session.service("ALTextToSpeech").done(jsnao.init_tts);
     jsnao.session.service("ALRobotPosture").done(jsnao.init_posture);
     jsnao.session.service("ALLeds").done(jsnao.init_led);
+    jsnao.session.service("ALAutonomousMoves").done(jsnao.init_autonomous);
+    jsnao.session.service("ALAnimatedSpeech").done(jsnao.init_animated);
+    jsnao.session.service("ALAudioPlayer").done(jsnao.init_audioplayer);
   },
   init_tts : function(data) {
     jsnao.al_tts = data;
@@ -63,10 +71,23 @@ var jsnao = {
     //$('#DivPosture').show();
     console.log('Led Initialized.');
   },
+  init_autonomous : function(data) {
+    jsnao.al_autonomous = data;
+
+    console.log('Autonomous Initialized.');
+  },
+  init_animated : function(data) {
+    jsnao.al_ats = data;
+    console.log('Animated Speech Initialized.');
+  },
   init_video : function(data) {
     jsnao.al_video = data;
     $('#DivVideo').show();
     console.log('Video Initialized.');
+  },
+  init_audioplayer : function (data) {
+    jsnao.al_audio = data;
+    console.log('Audio Initialized.');
   },
   level_logs: function(newLevel) {
     var new_level = 4;
