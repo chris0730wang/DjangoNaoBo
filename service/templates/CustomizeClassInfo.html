@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script>
+        //var result = prompt('請輸入Nao的IP');
+        //setnaoip();
+        function setnaoip(){
+
+          $.ajax({
+              url: "http://140.134.26.196/setnaoip/?ip="+result,
+              context: document.body,
+              success: function (data){
+                  alert(data.result);
+                  // window.location.href="http://140.134.26.196/home/";
+              }
+          });
+        }
+
+        function setclassstarttime(){
+          var starttime = document.getElementById("startdatettime").value;
+          var naoip = document.getElementById("naoip").value;
+          $.ajax({
+              url: "http://140.134.26.196/setstarttime/?starttime="+starttime,
+              context: document.body,
+              complete: function (data){
+                  // alert(data.result);
+              }
+          });
+          $.ajax({
+              url: "http://140.134.26.196/setnaoip/?ip="+naoip,
+              context: document.body,
+              success: function (data){
+                  alert(data.result);
+                  window.location.href="http://140.134.26.196/home/";
+              }
+          });
+        }
+
+    </script>
+    <title>Customize Class Info</title>
+</head>
+<body>
+
+此課程命名為：<input id="ClassName" size="10"><br><br>
+請排序以下模組功能（1為第一執行之模組功能，2為次，以此類推）<br><br>
+<input id="Checkstudent" size="1">  點名模組<br><br>
+<input id="TeachCustomizeVocabulary" size="1">  單字學習模組<br><br>
+<input id="ReadAloud" size="1">  課文模組<br><br>
+<input id="Test" size="1">  測驗模組<br><br>
+<input id="Activity" size="1">  課堂活動模組<br><br>
+<input id="Discussion" size="1">  小組討論模組<br><br>
+<br>
+        <table>
+          <tr>
+            <td align="left">
+              <form>
+                <a>請輸入Nao的IP位址(輕按Nao胸前的按鈕):</a>
+                <input id="naoip"><br><br>
+                <a>請輸入課程的日期與時間：</a>
+                <input id="startdatettime" type="datetime-local" name="startdatetime">
+                <br><br><input type="button" value="submit" onclick="setclassstarttime()">&nbsp;&nbsp;
+                <p id="demo"></p>
+              </form>
+            </td>
+          </tr>
+        </table>
+
+</body>
+</html>

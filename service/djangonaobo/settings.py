@@ -31,6 +31,7 @@ PROJECT_DIR = os.path.dirname(__file__)
 # Application definition
 
 INSTALLED_APPS = [
+    'import_export',
     'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -100,7 +101,7 @@ DATABASES = {
     }
 }
 X_FRAME_OPTIONS = 'ALLOWALL'
-
+IMPORT_EXPORT_USE_TRANSACTIONS = True
 XS_SHARING_ALLOWED_METHODS = ['POST', 'GET', 'OPTIONS', 'PUT', 'DELETE']
 
 # Password validation

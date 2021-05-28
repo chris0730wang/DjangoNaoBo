@@ -6,6 +6,7 @@
   <link rel="stylesheet"  type="text/css" href="{%  static  'css/style.css'  %}">
   <script>
     getnaoip();
+    getnextstarttime();
     var naoiptoconnect="";
     function getnaoip(){
         $.ajax({
@@ -16,12 +17,28 @@
               }
           });
     }
+
+    function getnextstarttime(){
+      $.ajax({
+              url: "http://140.134.26.196/getnextstarttime/",
+              context: document.body,
+              success: function(data){
+                  document.getElementById("NextStarttime").innerHTML="Next class will start at : "+data.starttime.toString();
+                  if(data.timecomparison === "OK"){
+                    document.getElementById("startbutton").style.display="block";
+                  }
+              }
+          });
+    }
   </script>
 <meta charset="utf8">
   <title>Multi-Robot System in english education classroom</title>
 </head>
 <body>
 <h2 id="NaoIP">Nao IP :</h2>
+<h2 id="NextStarttime">Next class will start at : </h2>
+<h2 id="time">{{result}}</h2>
+<button id="startbutton" onclick="window.open('http://140.134.26.196/checkstudent/')" style="display: none">開始課程</button>
 <script language="JavaScript">
 
       // function changesectiontostudentcheck(){

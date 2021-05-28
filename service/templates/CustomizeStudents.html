@@ -1,0 +1,129 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet"  type="text/css" href="{%  static  'css/style.css'  %}">
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
+
+    <script>
+        function changepoint(changepointstudent){
+            $.ajax({
+                    url: "http://140.134.26.196/changepoint/"+changepointstudent,
+                    context: document.body,
+                    data: this.data,
+                    success: function (data){
+                        alert(data.responsemessage);
+                        window.location.reload();
+                    }
+            });
+        }
+
+        function changecheck(student){
+            $.ajax({
+                    url: "http://140.134.26.196/changecheck/"+student,
+                    context: document.body,
+                    data: this.data,
+                    success: function (data){
+                        alert(data.responsemessage);
+                        window.location.reload();
+                    }
+            });
+        }
+
+        function randompickstudent(group){
+            $.ajax({
+                    url: "http://140.134.26.196/pickonestudent/?group="+group+"&classid="+location.search.substr(9),
+                    context: document.body,
+                    data: this.data,
+                    success: function (data){
+                        alert(data.pickedstudent);
+                        // window.location.reload();
+                    }
+            });
+        }
+    </script>
+    <title>Student List</title>
+</head>
+<body>
+<form>
+    <select id="classid">
+    <option value="" disabled selected hidden>課程編號</option>
+    {% for element in classids%}
+    <option value="classid={{element}}">{{element}}</option>
+    {% endfor %}
+    <input class="SubmitButton" type="button" value="Submit" onclick="showpage()">&nbsp;
+</select>
+</form>
+
+<script type="text/javascript">
+        var studentlistdata = JSON.parse('{{ serializersstudentlist | safe }}')
+        var studentgroupsnum = 0;
+        var staticgroupnum = 0;
+        var btn = document.createElement("BUTTON");
+        btn.innerText = "抽點一位學生";
+        btn.setAttribute("class", "pickonestudent");
+        btn.onclick = function (){
+                randompickstudent("all");
+            }
+        btn.id = "allpick";
+        document.body.appendChild(btn);
+        for (let i=0; i<studentlistdata.length; i++){
+            if(parseInt(studentlistdata[i].fields.studentgroup) !== staticgroupnum){
+                studentgroupsnum ++;
+                staticgroupnum = parseInt(studentlistdata[i].fields.studentgroup);
+                AddButton(staticgroupnum);
+            }
+        }
+        console.log(studentgroupsnum);
+        function AddButton(groupnum) {
+            var btn = document.createElement("BUTTON");
+            btn.innerText = "抽點一位第 " + groupnum + " 組的學生";
+            btn.onclick = function (){
+                randompickstudent(groupnum);
+            }
+            btn.setAttribute("class", "pickonestudent");
+            document.body.appendChild(btn);
+        }
+</script>
+
+<table align="left" border="1" width="40%">
+  <caption>{{classid}}課程中的學生<br><br></caption>
+  <tr>
+    <th align="center">學號</th>
+    <th align="center">姓名</th>
+    <th align="center">組別</th>
+    <th align="center">簽到情形</th>
+    <th align="center">加扣分</th>
+  </tr>
+  {% for element in StudentsList%}
+  <tr>
+    <td align="center">{{element.studentid}}</td>
+    <td align="center">{{element.studentname}}</td>
+    <td align="center">{{element.studentgroup}}</td>
+    <td align="center">
+        {{element.studentcheck}}
+        <button onclick="changecheck(value)" value="?student={{element.studentid}}"><img src="{% static 'img/changeicon.png' %}" width="20" height="20"></button>
+    </td>
+    <td align="center">
+          <button class="pluspoint" onclick="changepoint(value)" value="?change=plus&student={{element.studentid}}">+</button>
+          {{element.studentpoint}}
+          <button class="minuspoint" onclick="changepoint(value)" value="?change=minus&student={{element.studentid}}">-</button>
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+
+<script src = "//code.jquery.com/jquery-3.0.0.min.js"></script> <!-- add jquery library-->
+
+<script type = "text/javascript">
+
+function showpage(){
+    var sel = document.getElementById('classid');
+    var classid = sel.options[sel.selectedIndex].value;
+    window.location.href="http://140.134.26.196/customizestudentslist/?"+classid;
+}
+
+</script>
+</body>
+</html>

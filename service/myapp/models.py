@@ -287,4 +287,41 @@ class SetNaoIP(models.Model):
 
     def __str__(self):
         return self.IPAddress
+
+# 存取課程開始時間
+class SetStartTime(models.Model):
+    id = models.AutoField(primary_key=True)
+    starttime = models.DateTimeField(max_length=100, null=False)
+    timezone = models.DateTimeField(default=timezone.now())
+
+# 授課教師匯入學生名單
+class CustomizeStudentList(models.Model):
+    id = models.AutoField(primary_key=True)
+    classid = models.CharField(max_length=20, null=False)
+    studentid = models.CharField(max_length=20, null=False)
+    studentname = models.CharField(max_length=20, null=False)
+    studentgroup = models.IntegerField(null=True)
+    studentcheck = models.CharField(max_length=20, default="尚未簽到")
+    studentpoint = models.IntegerField(default=0)
+
+# 授課教師自定義單字
+class CustomizeVocabulary(models.Model):
+    id = models.AutoField(primary_key=True)
+    package = models.CharField(max_length=100, null=True)
+    word = models.CharField(max_length=100, null=False)
+    partofspeech = models.CharField(max_length=20, null=True)
+    meaning = models.CharField(max_length=100, null=True)
+
+# 授課教師匯入測驗題目正確答案
+class CustomizeQuestionAndAnswer(models.Model):
+    id = models.AutoField(primary_key=True)
+    package = models.CharField(max_length=100, null=False)
+    questionnum = models.IntegerField(null=False)
+    question = models.CharField(max_length=100, null=False)
+    answer = models.CharField(max_length=100, null=False)
+    option1 = models.CharField(max_length=100, null=False)
+    option2 = models.CharField(max_length=100, null=False)
+    option3 = models.CharField(max_length=100, null=True)
+    option4 = models.CharField(max_length=100, null=True)
+    errorrate = models.IntegerField(null=True)
 # Create your models here.

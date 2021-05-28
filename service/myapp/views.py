@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect
 from .models import Pay, studentcheck, VocabularyPreview, U10R1VocabularyPreviewAns, U10R2VocabularyPreviewAns
 from .models import BeforeYouRead, U10BeforeYouReadAns, FocusOnContent, U10R1FocusonContentAns, U10R2FocusonContentAns
-from .models import VocabularyReview, U10R1VocabularyReviewAns, U10R2VocabularyReviewAns, VocabularyDetail, SetNaoIP
+from .models import VocabularyReview, U10R1VocabularyReviewAns, U10R2VocabularyReviewAns, VocabularyDetail, SetNaoIP, SetStartTime
+from .models import CustomizeStudentList, CustomizeVocabulary
 from django.http import HttpResponse, JsonResponse
 from django.core.exceptions import ObjectDoesNotExist
 from datetime import datetime
@@ -9,6 +10,10 @@ from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 import json
 from django.forms.models import model_to_dict
+from django.utils.dateparse import parse_datetime
+from django.utils import timezone
+from django.db.models import Q
+from django.core import serializers
 
 section = ["section", "section", "section", "section", "section"]
 vocabularylist = []
@@ -45,9 +50,10 @@ def pay(request):
 # 全部網頁的連結
 def homepage(request):
     return render(request, "homepage.html", locals())
+
 # 設定Nao IP的網頁
-def setnaoipdirectlyNET(request):
-    return render(request, "setnaoipdirectly.html", locals())
+def CustomizeClassInfo(request):
+    return render(request, "CustomizeClassInfo.html", locals())
 
 # 設定Nao IP的url
 def setnaoipNET(request):
@@ -56,11 +62,30 @@ def setnaoipNET(request):
     print(naoip+"已儲存")
     return JsonResponse({'result': 'Save Successfully'})
 
+# 設定系統開始時間
+def setclassstarttime(request):
+    starttime = request.GET.get('starttime')
+    print(parse_datetime(starttime))
+    SetStartTime.objects.create(starttime=starttime)
+    return JsonResponse({'result': 'Save Successfully'})
+
 # 網頁抓取資料庫中最新的Nao IP來連線
 def getnaoipNET(request):
     newestrecord = SetNaoIP.objects.all().last()
     print(newestrecord.IPAddress)
     return JsonResponse({'IP': newestrecord.IPAddress})
+
+# 網頁抓取資料庫中最新設定的課程時間
+def getnextstarttime(request):
+    newestrecord = SetStartTime.objects.all().last()
+    print(newestrecord.starttime)
+    if timezone.now() < newestrecord.starttime:
+        timecomparison = "notyet"
+    elif (timezone.now() - newestrecord.starttime).total_seconds() > 3600:
+        timecomparison = "Expired"
+    else:
+        timecomparison = "OK"
+    return JsonResponse({'starttime': str(newestrecord.starttime), 'timecomparison': timecomparison})
 
 # Just Say Hello
 def sayhello(request):
@@ -76,9 +101,21 @@ def hello2(request,username):
 def naoindexNET(request):
     return render(request, "naoindex.html", locals())
 
+# 計時時鐘
+def clock(request):
+    sec = request.GET.get('sec')
+    return render(request, "clock.html", locals())
+
 # 首頁
 @csrf_exempt
 def home(request):
+    nextstarttime = SetStartTime.objects.all().last()
+    if timezone.now() < nextstarttime.starttime:
+        result = "尚未到達預定上課時間，您可重新設定上課時間或等待。"
+    elif (timezone.now() - nextstarttime.starttime).total_seconds() > 3600:
+        result = "已超過預定時間一小時，請重新設定！"
+    else:
+        result = "已可開始課程，點選開始課程按鈕後將進入點名階段。"
     return render(request, "home.html", locals())
 
 # 學生名單列表 首頁中的Students部分
@@ -1768,7 +1805,75 @@ def getgroupstudents(request):
         return JsonResponse(
             {'student1': students[0].cId, 'student2': students[1].cId, 'student3': students[2].cId,
              'student4': students[3].cId, 'student5': students[4].cId, 'student6': students[5].cId})
-# def getfocusoncontentscoredetailNET(request):
 
+# 授課教師匯入後的單字教學
+def teachcustomizevocabulary(request):
+    package = request.GET.get('package')
+    if package != None:
+        Vocabularies = CustomizeVocabulary.objects.filter(package=package)
+    categories = []
+    packagename = ""
+    randomset = CustomizeVocabulary.objects.filter(~Q(package=packagename)).order_by('id')
+    while 1:
+        randomset = randomset.filter(~Q(package=packagename)).order_by('id')
+        randomone = randomset.first()
+        packagename = randomone.package
+        categories.append(packagename)
+        if randomset.filter(~Q(package=packagename)).count() == 0:
+            break
+
+    return render(request, "TeachCustomizeVocabulary.html", locals())
+
+# 授課教師匯入名單後的點名系統
+def customizestudentslist(request):
+    classid = request.GET.get('classid')
+    if classid != None:
+        StudentsList = CustomizeStudentList.objects.filter(classid=classid)
+        serializersstudentlist = serializers.serialize("json", StudentsList)
+    classids = []
+    classidname = ""
+    randomset = CustomizeStudentList.objects.filter(~Q(classid=classidname)).order_by('id')
+    while 1 :
+        randomset = randomset.filter(~Q(classid=classidname)).order_by('id')
+        randomone = randomset.first()
+        classidname = randomone.classid
+        classids.append(classidname)
+        if randomset.filter(~Q(classid=classidname)).count()==0:
+            break
+
+    return render(request, "CustomizeStudents.html", locals())
+
+# 授課教師匯入名單後加減分
+def customizestudentchangepoint(request):
+    studentid = request.GET.get('student')
+    plusorminus = request.GET.get('change')
+    student = CustomizeStudentList.objects.get(studentid=studentid)
+    if plusorminus == "plus":
+        student.studentpoint += 1
+    else:
+        student.studentpoint -= 1
+    student.save()
+    return JsonResponse({'responsemessage': "Success"})
+
+# 授課教師匯入名單後更改簽到狀況
+def customizestudentchangecheck(request):
+    studentid = request.GET.get('student')
+    student = CustomizeStudentList.objects.get(studentid=studentid)
+    if student.studentcheck == "尚未簽到":
+        student.studentcheck = "已簽到"
+    else:
+        student.studentcheck = "尚未簽到"
+    student.save()
+    return JsonResponse({'responsemessage': 'Success'})
+
+# 授課教師匯入名單後隨機點名
+def customizerandompickstudent(request):
+    group = request.GET.get('group')
+    classid = request.GET.get('classid')
+    if group == "all":
+        pickedstudent = CustomizeStudentList.objects.filter(classid=classid).order_by('?').first()
+    else:
+        pickedstudent = CustomizeStudentList.objects.filter(classid=classid, studentgroup=group).order_by('?').first()
+    return JsonResponse({'pickedstudent': pickedstudent.studentname})
 
 # Create your views here.
