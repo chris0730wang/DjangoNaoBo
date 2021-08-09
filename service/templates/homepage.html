@@ -2,35 +2,58 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
     <title>Multi-Robot System in English Education Classroom</title>
+    <script>
+        var result = prompt('請輸入Nao的IP(輕按NAO機器人胸口的按鍵)');
+        setnaoip();
+        function setnaoip(){
+          $.ajax({
+              url: "http://140.134.26.196/setnaoip/?ip="+result,
+              context: document.body,
+              success: function (data){
+                  alert(data.result);
+              }
+          });
+        }
+    </script>
+
 </head>
 <body>
-<h1>Multi-Robot System in English Education Classroom</h1>
+<h1>Modular Multi-Robot System in English Education Classroom</h1>
 <h2>使用說明：</h2>
-<a>歡迎使用英語課堂分組教學多機器人系統，首先請先點選設定Nao IP的連結，並輸入Nao機器人的IP，輸入完成後網頁會自動導向主頁面。</a>
+<a>歡迎使用模組化英語教學多機器人系統，首先請先確認您是否已經輸入NAO的IP位址，若尚未輸入請重新整理此頁面，並在對話框中輸入NAO的IP位址，謝謝。</a>
 <br><br>
-<a>主頁面中會包含學生們Before You Read、Vocabulary Preview、Reading、Vocabulary Review、Focus on Content的測驗結果。</a>
+<a>本研究開發一套可支援課堂代理教學的多機器人教育系統，本系統提供了七個功能模組。
+    <br>分別為點名模組、單字教學模組、課文教學模組、測驗模組、課堂活動模組、小組討論模組以及休息時間模組。
+    <br>授課教師只需將授課的資料匯入至課程資料的網頁介面，並至編輯課程的網頁介面自定義所需的功能模組，即可完成希望由多機器人代理教學的課程內容。</a>
 <br><br>
-<a>接著請點選"點名網頁"，此頁面提供了分組的名單以及切換Zenbo Junior任務等功能，進入頁面後請先選擇週數後再進行後續的動作。</a>
+<a>在下面網址清單中，點選"匯入課程資料"後將會為您導向至Dango Admin網頁，在那裏您可以依照資料庫格式的規範匯入課程資料
+    <br>點選"課程設定"後將會為您導向至編輯課程的頁面，頁面中提供了課程命名、注意事項以及功能模組的運用。
+    <br>點選"開始全自動課程"後將會為您導向至全自動課程的開始頁面，此頁面會提供目前系統資料庫中已存在的全自動課程，您可點選課程下的Start按鍵來讓NAO機器人與ZENBO JUNIOR替您進行授課。</a>
 <br><br>
 <h2>網址清單</h2>
 
 <ol>
-<li><a href="http://140.134.26.196/admin/">匯入課程資料</a></li>
-<li><a href="http://140.134.26.196/customizeclassinfo/">課程設定</a></li>
-<li><a href="http://140.134.26.196/customizestudentslist/">點名網頁</a></li>
-<li><a href="http://140.134.26.196/teachcustomizevocabulary/">單字教學</a></li>
-<li><a href="http://140.134.26.196/home/">主頁面</a></li>
-    <ul>
-        <li><a href="http://140.134.26.196/beforeyoureadresult/?unit=10">Before You Read</a> </li>
-        <li><a href="http://140.134.26.196/vocabularypreviewresult/?unit=10&reading=1">Unit 10 Reading 1 Vocabulary Preview </a> </li>
-        <li><a href="http://140.134.26.196/vocabularypreviewresult/?unit=10&reading=2">Unit 10 Reading 2 Vocabulary Preview </a> </li>
-        <li><a href="http://140.134.26.196/reading/?unit=10&reading=1">Unit 10 Reading Audio Website</a> </li>
-        <li><a href="http://140.134.26.196/focusoncontentresult/?unit=10&reading=1">Unit 10 Reading 1 Focus on Content </a> </li>
-        <li><a href="http://140.134.26.196/focusoncontentresult/?unit=10&reading=2">Unit 10 Reading 2 Focus on Content </a> </li>
-        <li><a href="http://140.134.26.196/vocabularyreviewresult/?unit=10&reading=1">Unit 10 Reading 1 Vocabulary Review </a> </li>
-        <li><a href="http://140.134.26.196/vocabularyreviewresult/?unit=10&reading=2">Unit 10 Reading 2 Vocabulary Review </a> </li>
-    </ul>
+<li><a href="http://140.134.26.196/admin/" target="_blank">匯入課程資料</a></li><br>
+<li><a href="http://140.134.26.196/customizeclassinfo/" target="_blank">新增多機器人代理教學課程</a></li><br>
+<li><a href="http://140.134.26.196/autoclasspage/" target="_blank">開始多機器人代理教學課程</a></li>
+<!--<li><a href="http://140.134.26.196/customizestudentslist/" target="_blank">點名網頁</a></li>-->
+<!--<li><a href="http://140.134.26.196/teachcustomizevocabulary/" target="_blank">單字教學</a></li>-->
+<!--<li><a href="http://140.134.26.196/customizequiz/" target="_blank">測驗模組</a></li>-->
+<!--<li><a href="http://140.134.26.196/customizereadaloud/" target="_blank">課文講解</a></li>-->
+<!--<li><a href="http://140.134.26.196/customizeexercise/" target="_blank">帶動唱</a></li>-->
+<!--<li><a href="http://140.134.26.196/home/" target="_blank">主頁面</a></li>-->
+<!--    <ul>-->
+<!--        <li><a href="http://140.134.26.196/beforeyoureadresult/?unit=10" target="_blank">Before You Read</a> </li>-->
+<!--        <li><a href="http://140.134.26.196/vocabularypreviewresult/?unit=10&reading=1" target="_blank">Unit 10 Reading 1 Vocabulary Preview </a> </li>-->
+<!--        <li><a href="http://140.134.26.196/vocabularypreviewresult/?unit=10&reading=2" target="_blank">Unit 10 Reading 2 Vocabulary Preview </a> </li>-->
+<!--        <li><a href="http://140.134.26.196/reading/?unit=10&reading=1" target="_blank">Unit 10 Reading Audio Website</a> </li>-->
+<!--        <li><a href="http://140.134.26.196/focusoncontentresult/?unit=10&reading=1" target="_blank">Unit 10 Reading 1 Focus on Content </a> </li>-->
+<!--        <li><a href="http://140.134.26.196/focusoncontentresult/?unit=10&reading=2" target="_blank">Unit 10 Reading 2 Focus on Content </a> </li>-->
+<!--        <li><a href="http://140.134.26.196/vocabularyreviewresult/?unit=10&reading=1" target="_blank">Unit 10 Reading 1 Vocabulary Review </a> </li>-->
+<!--        <li><a href="http://140.134.26.196/vocabularyreviewresult/?unit=10&reading=2" target="_blank">Unit 10 Reading 2 Vocabulary Review </a> </li>-->
+<!--    </ul>-->
 </ol>
 
 </body>

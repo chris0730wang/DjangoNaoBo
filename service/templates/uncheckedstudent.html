@@ -49,6 +49,10 @@
 <script language="JavaScript">
       var week="3";
 
+      setTimeout(function(){
+            randompickstudent(123);
+        },5000);
+
       function GO(url){
           $.ajax({
               url: url,
@@ -84,18 +88,34 @@
           });
       }
 
+
       function randompickstudent(weekandgroup){
-          $.ajax({
-              url: "http://140.134.26.196"+weekandgroup,
-              context: document.body,
-              data: this.data,
-              success: function (data) {
-                  alert(data.result);
-                  jsnao.al_tts.setLanguage('Chinese');
-                  jsnao.al_tts.say(data.result.toString());
-                  window.location.reload();
-              }
-          });
+          // $.ajax({
+          //     url: "http://140.134.26.196"+weekandgroup,
+          //     context: document.body,
+          //     data: this.data,
+          //     success: function (data) {
+          //         alert(data.result);
+          //         jsnao.al_tts.setLanguage('Chinese');
+          //         jsnao.al_tts.say(data.result.toString());
+          //         window.location.reload();
+          //     }
+          // });
+          // jsnao.al_ats.say("hello");
+          // jsnao.al_ats._setMSPauseBeforeSpeech(5000);
+          // jsnao.al_ats.say("world");
+
+          // jsnao.al_tts.say("第一句", "Chinese");
+          // jsnao.al_tts.setParameter("speed", 50);
+          // jsnao.al_ats.say("not quite accurately or exactly; roughly");
+          // jsnao.al_tts.say("第二句", "Chinese");
+          // jsnao.al_ats.say("hello world");
+
+          jsnao.al_tts.say("第一句", "Chinese");
+          jsnao.al_tts.setParameter("speed", 50);
+          jsnao.al_ats.say("not quite accurately or exactly; roughly");
+          jsnao.al_tts.say("第二句", "Chinese");
+          jsnao.al_ats.say("hello world");
       }
 
       function announceuncheckedstudent(url){
@@ -512,6 +532,6 @@
     </form>
     <br><br>
     </table>
-<iframe name="iframe" id="clock" src="http://140.134.26.196/clock/?min=2.5" style="width: 100%; height: 400px" scrolling="auto" marginwidth="0" marginheight="0" frameborder="0" vspace="0" hspace="50"></iframe>
+<!--<iframe name="iframe" id="clock" src="http://140.134.26.196/clock/?min=2.5" style="width: 100%; height: 400px" scrolling="auto" marginwidth="0" marginheight="0" frameborder="0" vspace="0" hspace="50"></iframe>-->
 </body>
 </html>

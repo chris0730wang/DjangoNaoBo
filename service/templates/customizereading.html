@@ -1,0 +1,182 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet"  type="text/css" href="{%  static  'css/style.css'  %}">
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="{% static 'js/socket.io.min.js' %}"></script>
+    <script src="{% static 'js/deferred.js' %}"></script>
+    <script type="text/javascript">
+    getnaoip();
+    function getnaoip(){
+            var naoiptoconnect="";
+            $.ajax({
+                  url: "http://140.134.26.196/getnaoip/",
+                  context: document.body,
+                  success: function(data){
+                      naoiptoconnect=data.IP;
+                  }
+              });
+            var nao_address = "192.168.0.101";
+            var jsQim = '/static/js/qimessaging.js';
+            if (nao_address == '') {
+                nao_address = '10.2.1.164';
+                jsQim = 'http://' + nao_address + jsQim;
+            }
+            $.getScript(jsQim, function() {
+                console.log('QiMessaging Library Loaded');
+                $.getScript('/static/js/jsnao.js', function() {
+                console.log('JsNAO Library Loaded');
+                $(document).ready(function() {
+                    jsnao.connect(naoiptoconnect);
+                    $('#RbtSay').keyup(function (e){
+                    if (e.keyCode == 13 /* Enter */) {
+                        jsnao.al_tts.say($('#RbtSay').val());
+                    }
+                    });
+                });
+                });
+            });
+        }
+
+    </script> <!-- nao 連線 -->
+    <script type="text/javascript">
+
+        var Teachlesson = JSON.parse('{{ serializersteachlesson | safe }}');
+        var readingpart = 0;
+
+        if (location.search.match("classname")){
+            setTimeout(function(){
+                autostartclass();
+                checkgroupsready();
+            },7000);
+        }
+
+        function checkgroupsready(){
+            $.ajax({
+              url: "http://140.134.26.196/checkallgroupsready/",
+              context: document.body,
+              success: function(data){
+                  console.log(data.result.toString());
+                  if(data.result === "ready"){
+                      naoreadinspeech();
+                  }else{
+                      setTimeout(checkgroupsready,10000);
+                  }
+              }
+          });
+        }
+
+        function gotonextstep(){
+            var classname = "{{classname|safe}}";
+            var nextstep = "{{nextstep|safe}}";
+            var nextstepdetail = "{{nextstepdetail|safe}}";
+            var stepnow = "{{stepnow}}";
+            switch (nextstep) {
+                case "vocabularyteach":
+                    window.location.assign("http://140.134.26.196/teachcustomizevocabulary/?step=" + (parseInt(stepnow) + 1).toString() + "&classname=" + classname + "&package=" + nextstepdetail);
+                    break;
+                case "clock":
+                    window.location.assign("http://140.134.26.196/clock/?step=" + (parseInt(stepnow) + 1).toString() + "&classname=" + classname + "&min=" + nextstepdetail);
+                    break;
+                case "studentcheck":
+                    window.location.assign("http://140.134.26.196/customizestudentslist/?step=" + (parseInt(stepnow) + 1).toString() + "&classname=" + classname + "&classid=" + nextstepdetail)
+                    break;
+                case "quiz":
+                    window.location.assign("http://140.134.26.196/customizequiz/?step=" + (parseInt(stepnow) + 1).toString() + "&classname=" + classname + "&package=" + nextstepdetail);
+                    break;
+                case "reading":
+                    window.location.assign("http://140.134.26.196/customizereading/?step=" + (parseInt(stepnow) + 1).toString() + "&classname=" + classname + "&lesson=" + nextstepdetail);
+                    break;
+                case"exercise":
+                    window.location.assign("http://140.134.26.196/customizeexercise/?step=" + (parseInt(stepnow) + 1).toString() + "&classname=" + classname + "&exercisename=" + nextstepdetail);
+                    break;
+                case"discussion":
+                    window.location.assign("http://140.134.26.196/customizediscussion/?step="+(parseInt(stepnow)+1).toString()+"&classname="+classname+"&issue="+nextstepdetail);
+                    break;
+                default:
+                    jsnao.al_tts.say("此課程已經結束", "Chinese");
+                    var attention = "{{attention|safe}}";
+                    if(attention!==""){
+                        jsnao.al_tts.say("有幾點注意事項宣布", "Chinese");
+                        if(attention.match("/")){
+                            attention = attention.split("/");
+                            // console.log(attention[0]);
+                            for(var i=0; i<attention.length; i++){
+                                jsnao.al_tts.say(attention[i].toString()+"\\\\pau=2000\\\\", "Chinese");
+                            }
+                        }else{
+                            jsnao.al_tts.say(attention.toString()+"\\\\pau=2000\\\\", "Chinese");
+                        }
+                    }
+                    jsnao.al_tts.say("各位同學辛苦了", "Chinese");
+                    break;
+            }
+        }
+
+        function naoreadinspeech(){
+            console.log(readingpart + "  " + Teachlesson.length);
+            if(readingpart<Teachlesson.length){
+                if(readingpart === Teachlesson.length-1)checkgroupsready();
+                // jsnao.al_audio.playFile(Teachlesson[readingpart].fields.readinginaudio.toString());
+                readingpart++;
+                $.ajax({
+                    url: "http://140.134.26.196/readingpartsettingandgetting/?access=setting&part="+readingpart.toString(),
+                    context: document.body,
+                    success: function(data){
+                        console.log(data.result.toString());
+                    }
+                });
+            }else{
+                gotonextstep();
+            }
+        }
+
+        async function autostartclass(){
+            // jsnao.al_tts.setLanguage("English");
+            //   if (location.search.match("classname")) {
+            //       var stepnow = "{{stepnow|safe}}";
+            //       if(stepnow==="1"){
+            //           jsnao.al_tts.say("即將開始課程", "Chinese");
+            //           var attention = "{{attention|safe}}";
+            //           if(attention!==""){
+            //               jsnao.al_tts.say("首先有幾點注意事項宣布", "Chinese");
+            //               if(attention.match("/")){
+            //                   attention = attention.split("/");
+            //                   // console.log(attention[0]);
+            //                   for(var i=0; i<attention.length; i++){
+            //                       jsnao.al_tts.say(attention[i].toString()+"\\\\pau=2000\\\\", "Chinese");
+            //                   }
+            //               }else{
+            //                   jsnao.al_tts.say(attention.toString()+"\\\\pau=2000\\\\", "Chinese");
+            //               }
+            //           }
+            //       }
+            //       jsnao.al_tts.say("開始帶念課文，請同學們跟我一起練習", "Chinese");
+                  setTimeout(function (){
+                      naoreadinspeech();
+                  }, 10000);
+              // }
+        }
+
+    </script>
+    <title>Read Aloud</title>
+</head>
+<body>
+<table align="center" border="1" width="80%">
+  <caption style="font-family:DFKai-sb">{{lesson}}類別中的課文<br><br></caption>
+  <tr>
+    <th align="center">段落</th>
+    <th align="center">課文</th>
+  </tr>
+  {% for element in Teachlesson%}
+  <tr>
+    <td align="center">{{element.part}}</td>
+    <td align="center">{{element.readingintext}}</td>
+  </tr>
+  {% endfor %}
+</table>
+
+</body>
+</html>

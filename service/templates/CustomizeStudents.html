@@ -5,8 +5,149 @@
     <meta charset="UTF-8">
     <link rel="stylesheet"  type="text/css" href="{%  static  'css/style.css'  %}">
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        getnaoip();
+    function getnaoip(){
+        var naoiptoconnect="";
+        $.ajax({
+              url: "http://140.134.26.196/getnaoip/",
+              context: document.body,
+              success: function(data){
+                  naoiptoconnect=data.IP;
+              }
+          });
+        var nao_address = "192.168.0.101";
+        var jsQim = '/static/js/qimessaging.js';
+        if (nao_address == '') {
+            nao_address = '10.2.1.164';
+            jsQim = 'http://' + nao_address + jsQim;
+        }
+        $.getScript(jsQim, function() {
+            console.log('QiMessaging Library Loaded');
+            $.getScript('/static/js/jsnao.js', function() {
+            console.log('JsNAO Library Loaded');
+            $(document).ready(function() {
+                jsnao.connect(naoiptoconnect);
+                $('#RbtSay').keyup(function (e){
+                if (e.keyCode == 13 /* Enter */) {
+                    jsnao.al_tts.say($('#RbtSay').val());
+                }
+                });
+            });
+            });
+        });
+    }
+    </script> <!-- nao 連線 -->
 
     <script>
+        if(location.search.match("classname")){
+            setTimeout(function (){
+                autostartclass();
+                checkgroupsready();
+            },5000);
+        }
+
+        function checkgroupsready(){
+            $.ajax({
+              url: "http://140.134.26.196/checkallgroupsready/",
+              context: document.body,
+              success: function(data){
+                  console.log(data.result.toString());
+                  if(data.result === "ready"){
+                      gotonextstep();
+                  }else{
+                      setTimeout(checkgroupsready,10000);
+                  }
+              }
+          });
+        }
+
+        function gotonextstep(){
+            var classname = "{{classname|safe}}";
+            var nextstep = "{{nextstep|safe}}";
+            var nextstepdetail = "{{nextstepdetail|safe}}";
+            var stepnow = "{{stepnow}}";
+            switch (nextstep) {
+                case "vocabularyteach":
+                    window.location.assign("http://140.134.26.196/teachcustomizevocabulary/?step=" + (parseInt(stepnow) + 1).toString() + "&classname=" + classname + "&package=" + nextstepdetail);
+                    break;
+                case "clock":
+                    window.location.assign("http://140.134.26.196/clock/?step=" + (parseInt(stepnow) + 1).toString() + "&classname=" + classname + "&min=" + nextstepdetail);
+                    break;
+                case "studentcheck":
+                    window.location.assign("http://140.134.26.196/customizestudentslist/?step=" + (parseInt(stepnow) + 1).toString() + "&classname=" + classname + "&classid=" + nextstepdetail)
+                    break;
+                case "quiz":
+                    window.location.assign("http://140.134.26.196/customizequiz/?step=" + (parseInt(stepnow) + 1).toString() + "&classname=" + classname + "&package=" + nextstepdetail);
+                    break;
+                case "reading":
+                    window.location.assign("http://140.134.26.196/customizereading/?step=" + (parseInt(stepnow) + 1).toString() + "&classname=" + classname + "&lesson=" + nextstepdetail);
+                    break;
+                case"exercise":
+                    window.location.assign("http://140.134.26.196/customizeexercise/?step=" + (parseInt(stepnow) + 1).toString() + "&classname=" + classname + "&exercisename=" + nextstepdetail);
+                    break;
+                case"discussion":
+                    window.location.assign("http://140.134.26.196/customizediscussion/?step="+(parseInt(stepnow)+1).toString()+"&classname="+classname+"&issue="+nextstepdetail);
+                    break;
+                default:
+                    jsnao.al_tts.setLanguage("Chinese");
+                    // jsnao.al_tts.say("此課程已經結束");
+                    jsnao.al_ats.say("此課程已經結束");
+                    var attention = "{{attention|safe}}";
+                    if(attention!==""){
+                        // jsnao.al_tts.say("有幾點注意事項宣布");
+                        jsnao.al_ats.say("有幾點注意事項宣布");
+                        if(attention.match("/")){
+                            attention = attention.split("/");
+                            // console.log(attention[0]);
+                            for(var i=0; i<attention.length; i++){
+                                // jsnao.al_tts.say(attention[i].toString()+"\\\\pau=2000\\\\");
+                                jsnao.al_ats.say(attention[i].toString());
+                                jsnao.al_ats._setMSPauseBeforeSpeech(2000);
+                            }
+                        }else{
+                            // jsnao.al_tts.say(attention.toString()+"\\\\pau=2000\\\\");
+                            jsnao.al_ats.say(attention.toString());
+                            jsnao.al_ats._setMSPauseBeforeSpeech(2000);
+                        }
+                    }
+                    // jsnao.al_tts.say("各位同學辛苦了");
+                    jsnao.al_ats.say("各位同學辛苦了");
+                    break;
+            }
+        }
+
+        async function autostartclass() {
+            jsnao.al_tts.setParameter("speed", 50);
+            if (location.search.match("classname")) {
+                var stepnow = "{{stepnow}}";
+                if(stepnow==="1"){
+                    jsnao.al_tts.setLanguage("Chinese");
+                    // jsnao.al_tts.say("即將開始課程");
+                    jsnao.al_ats.say("即將開始課程");
+                    var attention = "{{attention|safe}}";
+                    if(attention!==""){
+                        // jsnao.al_tts.say("首先有幾點注意事項宣布");
+                        jsnao.al_ats.say("首先有幾點注意事項宣布");
+                        if(attention.match("/")){
+                            attention = attention.split("/");
+                            // console.log(attention[0]);
+                            for(var i=0; i<attention.length; i++){
+                                // jsnao.al_tts.say(attention[i].toString()+"\\\\pau=2000\\\\");
+                                jsnao.al_ats.say(attention[i].toString());
+                                jsnao.al_ats._setMSPauseBeforeSpeech(2000);
+                            }
+                        }else{
+                            // jsnao.al_tts.say(attention.toString()+"\\\\pau=2000\\\\");
+                            jsnao.al_ats.say(attention.toString());
+                            jsnao.al_ats._setMSPauseBeforeSpeech(2000);
+                        }
+                    }
+                }
+                await naoannounceuncheckstudent();
+            }
+        }
+
         function changepoint(changepointstudent){
             $.ajax({
                     url: "http://140.134.26.196/changepoint/"+changepointstudent,
@@ -37,25 +178,52 @@
                     context: document.body,
                     data: this.data,
                     success: function (data){
+                        jsnao.al_tts.setLanguage('Chinese');
+                        jsnao.al_tts.say(data.pickedstudent.toString());
                         alert(data.pickedstudent);
                         // window.location.reload();
                     }
             });
         }
+
+        function naoannounceuncheckstudent(){
+            jsnao.al_tts.setLanguage("Chinese");
+            jsnao.al_ats.say("即將唱名尚未簽到的同學，被唱名到的同學請盡快以QR Code進行簽到");
+            var studentlistdata = JSON.parse('{{ serializersstudentlist | safe }}')
+            var unchecknum = 0;
+            jsnao.al_tts.setLanguage("Chinese");
+            for(i=0; i<studentlistdata.length; i++){
+                if(studentlistdata[i].fields.studentcheck!=="已簽到"){
+                    unchecknum++;
+                    // jsnao.al_tts.say(studentlistdata[i].fields.studentname.toString()+"\\pau=2500\\");
+                    jsnao.al_ats.say(studentlistdata[i].fields.studentname.toString());
+                    jsnao.al_ats._setMSPauseBeforeSpeech(2500);
+                    // jsnao.al_tts.say(studentlistdata[i].fields.studentname.toString()+"\\pau=2500\\");
+                    jsnao.al_ats.say(studentlistdata[i].fields.studentname.toString());
+                    jsnao.al_ats._setMSPauseBeforeSpeech(2500);
+                }
+            }
+            jsnao.al_ats.say("點名結束了！請各組同學點選小布螢幕上的準備按鍵繼續下一階段的課程！", "Chinese");
+        }
     </script>
     <title>Student List</title>
 </head>
 <body>
+<div align="center">
 <form>
-    <select id="classid">
+    <select id="classid" class="beautyselect">
     <option value="" disabled selected hidden>課程編號</option>
     {% for element in classids%}
     <option value="classid={{element}}">{{element}}</option>
     {% endfor %}
-    <input class="SubmitButton" type="button" value="Submit" onclick="showpage()">&nbsp;
-</select>
+    <input class="submitbutton" type="button" value="Submit" onclick="showpage()">&nbsp;<br><br>
+    </select>
 </form>
-
+</div>
+<br>
+<div align="center"><input type="button" align="center" class="pickonestudent" value="唱名未簽到學生" onclick="naoannounceuncheckstudent()"></div>
+<br><br>
+<div id="buttonset" align="center"></div><br>
 <script type="text/javascript">
         var studentlistdata = JSON.parse('{{ serializersstudentlist | safe }}')
         var studentgroupsnum = 0;
@@ -67,7 +235,7 @@
                 randompickstudent("all");
             }
         btn.id = "allpick";
-        document.body.appendChild(btn);
+        document.getElementById('buttonset').appendChild(btn);
         for (let i=0; i<studentlistdata.length; i++){
             if(parseInt(studentlistdata[i].fields.studentgroup) !== staticgroupnum){
                 studentgroupsnum ++;
@@ -75,7 +243,6 @@
                 AddButton(staticgroupnum);
             }
         }
-        console.log(studentgroupsnum);
         function AddButton(groupnum) {
             var btn = document.createElement("BUTTON");
             btn.innerText = "抽點一位第 " + groupnum + " 組的學生";
@@ -83,12 +250,12 @@
                 randompickstudent(groupnum);
             }
             btn.setAttribute("class", "pickonestudent");
-            document.body.appendChild(btn);
+            btn.setAttribute("align", "left");
+            document.getElementById('buttonset').appendChild(btn);
         }
 </script>
-
-<table align="left" border="1" width="40%">
-  <caption>{{classid}}課程中的學生<br><br></caption>
+<table align="center" border="1" width="40%">
+  <caption style="font-family:DFKai-sb">{{classid}}課程中的學生<br><br></caption>
   <tr>
     <th align="center">學號</th>
     <th align="center">姓名</th>

@@ -288,6 +288,9 @@ class SetNaoIP(models.Model):
     def __str__(self):
         return self.IPAddress
 
+
+# 修改後系統
+
 # 存取課程開始時間
 class SetStartTime(models.Model):
     id = models.AutoField(primary_key=True)
@@ -313,7 +316,7 @@ class CustomizeVocabulary(models.Model):
     meaning = models.CharField(max_length=100, null=True)
 
 # 授課教師匯入測驗題目正確答案
-class CustomizeQuestionAndAnswer(models.Model):
+class CustomizeQuiz(models.Model):
     id = models.AutoField(primary_key=True)
     package = models.CharField(max_length=100, null=False)
     questionnum = models.IntegerField(null=False)
@@ -323,5 +326,39 @@ class CustomizeQuestionAndAnswer(models.Model):
     option2 = models.CharField(max_length=100, null=False)
     option3 = models.CharField(max_length=100, null=True)
     option4 = models.CharField(max_length=100, null=True)
-    errorrate = models.IntegerField(null=True)
+
+# 授課教師設計課程
+class CustomizeClassInfo(models.Model):
+    id = models.AutoField(primary_key=True)
+    classname = models.CharField(max_length=100, null=False)
+    stepbystep = models.CharField(max_length=100, null=True)
+    stepbystepdetail = models.CharField(max_length=100, null=False)
+    stepbysteptoshow = models.CharField(max_length=255, null=False, default="")
+    attention = models.CharField(max_length=255, null=True)
+    timezone = models.DateTimeField(default=timezone.now())
+
+# 授課教師匯入閱讀課程
+class CustomizeReading(models.Model):
+
+    id = models.AutoField(primary_key=True)
+    lesson = models.CharField(max_length=100, null=False)
+    part = models.IntegerField(null=False)
+    readingintext = models.CharField(max_length=255, null=True)
+    readinginaudio = models.CharField(max_length=100, null=True)
+    readingexplanationaudio = models.CharField(max_length=100, null=True)
+
+# 課堂活動(帶動唱)
+class CustomizeExerciseInfo(models.Model):
+    id = models.AutoField(primary_key=True)
+    exercisename = models.CharField(max_length=100, null=False)
+    category = models.CharField(max_length=100, null=False)
+    musicdirectory = models.CharField(max_length=255, null=True)
+
+# # 小組討論
+class CustomizeDiscussion(models.Model):
+    id = models.AutoField(primary_key=True)
+    issuename = models.CharField(max_length=100, null=False, default="")
+    issue = models.CharField(max_length=100, null=False)
+    sampleanswer = models.CharField(max_length=255, null=True)
+    time = models.IntegerField(null=False)
 # Create your models here.

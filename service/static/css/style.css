@@ -74,35 +74,63 @@ caption{
     background: linear-gradient(to bottom, #be0017, #be0017);
 }
 
-.pickonestudent {
-    display: inline-block;
-    text-align: center;
-    vertical-align: middle;
-    padding: 4px 18px;
-    border: 1px solid #7b8ba4;
-    border-radius: 48px;
-    background: #c9e5ff;
-    background: -webkit-gradient(linear, left top, left bottom, from(#c9e5ff), to(#7b8ba4));
-    background: -moz-linear-gradient(top, #c9e5ff, #7b8ba4);
-    background: linear-gradient(to bottom, #c9e5ff, #7b8ba4);
-    text-shadow: #355e50 1px 1px 0px;
-    font: normal normal bold 18px comic sans ms;
-    color: #ffffff;
-    text-decoration: none;
+.beautyselect{
+    background:#fafdfe;
+    height:28px;
+    width:180px;
+    line-height:28px;
+    border:1px solid #9bc0dd;
+    -moz-border-radius:2px;
+    -webkit-border-radius:2px;
+    border-radius:2px;
 }
-.pickonestudent:hover,
-.pickonestudent:focus {
-    border: 1px solid #afc7ea;
-    background: #f1ffff;
-    background: -webkit-gradient(linear, left top, left bottom, from(#f1ffff), to(#94a7c5));
-    background: -moz-linear-gradient(top, #f1ffff, #94a7c5);
-    background: linear-gradient(to bottom, #f1ffff, #94a7c5);
-    color: #ffffff;
-    text-decoration: none;
+
+.submitbutton {
+	box-shadow: 4px 0px 0px -1px #9fb4f2;
+	background:linear-gradient(to bottom, #7892c2 5%, #476e9e 100%);
+	background-color:#7892c2;
+	border-radius:17px;
+	border:1px solid #4e6096;
+	display:inline-block;
+	cursor:pointer;
+	color:#ffffff;
+	font-family:Georgia;
+	font-size:14px;
+	font-weight:bold;
+	padding:6px 18px;
+	text-decoration:none;
+	text-shadow:0px 0px 0px #283966;
+}
+.submitbutton:hover {
+	background:linear-gradient(to bottom, #476e9e 5%, #7892c2 100%);
+	background-color:#476e9e;
+}
+.submitbutton:active {
+	position:relative;
+	top:1px;
+}
+
+.pickonestudent {
+	box-shadow:inset 0px 1px 0px 0px #ffffff;
+	background:linear-gradient(to bottom, #ededed 5%, #dfdfdf 100%);
+	background-color:#ededed;
+	border-radius:6px;
+	border:1px solid #dcdcdc;
+	display:inline-block;
+	cursor:pointer;
+	color:#777777;
+	font-family:DFKai-sb;
+	font-size:16px;
+	font-weight:bold;
+	padding:6px 24px;
+	text-decoration:none;
+	text-shadow:0px 1px 0px #ffffff;
+}
+.pickonestudent:hover {
+	background:linear-gradient(to bottom, #dfdfdf 5%, #ededed 100%);
+	background-color:#dfdfdf;
 }
 .pickonestudent:active {
-    background: #7b8ba4;
-    background: -webkit-gradient(linear, left top, left bottom, from(#7b8ba4), to(#7b8ba4));
-    background: -moz-linear-gradient(top, #7b8ba4, #7b8ba4);
-    background: linear-gradient(to bottom, #7b8ba4, #7b8ba4);
+	position:relative;
+	top:1px;
 }

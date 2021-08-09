@@ -1,11 +1,18 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="stylesheet"  type="text/css" href="{%  static  'css/style.css'  %}">
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
     <script>
         //var result = prompt('請輸入Nao的IP');
         //setnaoip();
+        var attentionnum = 1;
+        var stepnum = 1;
+        var stepbysteptodb = "";
+        var stepbystepdetailtodb = "";
+        var classidnowtosetdiscussion = ""
         function setnaoip(){
 
           $.ajax({
@@ -38,34 +45,267 @@
           });
         }
 
+        function saveclass(){
+            stepbystepdetailtodb = "";
+            var attentiontodb = "";
+            var stepbysteptoshow = "";
+            var classname = document.getElementById('ClassName').value;
+            var stepbystep = document.getElementById('stepbystep');
+            var steps = stepbystep.getElementsByTagName('h3');
+            for(var i=0; i<steps.length; i++){
+                stepbysteptoshow += steps[i].textContent + "/";
+                if(steps[i].textContent.match("小組討論模組")){
+                    var everygroupdiscussion = steps[i].textContent.substr(steps[i].textContent.indexOf("Group1"));
+                    var everygroupdiscussionlist = everygroupdiscussion.split("Group");
+                    console.log(everygroupdiscussionlist);
+                    for(var j=1; j<everygroupdiscussionlist.length; j++){
+                        if(j === everygroupdiscussionlist.length-1){
+                            everygroupdiscussionlist[j] = everygroupdiscussionlist[j].substr(everygroupdiscussionlist[j].indexOf(" : ") + 3) + "/";
+                        }else {
+                            everygroupdiscussionlist[j] = everygroupdiscussionlist[j].substr(everygroupdiscussionlist[j].indexOf(" : ") + 3) + "\\\\";
+                        }
+                        stepbystepdetailtodb += everygroupdiscussionlist[j];
+                    }
+                    console.log(everygroupdiscussionlist);
+                }else{
+                    stepbystepdetailtodb += steps[i].textContent.substring(steps[i].textContent.indexOf(": ")+2,steps[i].textContent.indexOf(" ",steps[i].textContent.indexOf(": ")+2)) + "/";
+                }
+            }
+            var attentionlist = document.getElementById('attentionlist');
+            var attentions = attentionlist.getElementsByTagName('h3');
+            for (i=0; i<attentions.length; i++){
+                attentiontodb += attentions[i].textContent + "/"
+            }
+            // var attentionarray = attentiontodb.split("/");
+            // var stepbysteparray = stepbysteptodb.split("/");
+            // var stepbystepdetailarray = stepbystepdetailtodb.split("/");
+            // console.log(attentionarray);
+            // console.log(classname);
+            // console.log(stepbysteparray)
+            // console.log(stepbystepdetailarray);
+            $.ajax({
+              url: "http://140.134.26.196/setclassinfo/?classname="+classname+"&stepbystep="+stepbysteptodb.substr(0,stepbysteptodb.length-1)
+                  +"&stepbystepdetail="+stepbystepdetailtodb.substr(0,stepbystepdetailtodb.length-1)
+                  +"&stepbysteptoshow="+stepbysteptoshow.substr(0,stepbysteptoshow.length-1)
+                  +"&attention="+attentiontodb.substr(0,attentiontodb.length-1),
+              context: document.body,
+              success: function (data){
+                  alert(data.responsemessage);
+              }
+            });
+        }
+
+        function addnewmode(){
+            var sel = document.getElementById('mode');
+            var newmode = sel.options[sel.selectedIndex].value;
+            if(newmode==="studentcheck"){
+                var classidsdata = {{ classids|safe }};
+                var detailchoose = prompt("學生名單資料庫中現有的課程代號：\n" + classidsdata + "\n請輸入您所想加入的課程名單");
+                if(classidsdata.toString().match(detailchoose)){
+                    classidnowtosetdiscussion = detailchoose.toString();
+                    console.log(classidnowtosetdiscussion);
+                    alert('新增' + detailchoose + "課程點名模組");
+                    let stepbystep = document.getElementById('stepbystep');
+                    let helement = document.createElement('h3')
+                    helement.id = "step"+stepnum.toString();
+                    helement.innerText = "Step " + stepnum.toString() + " : " + detailchoose;
+                    helement.style.display = "inline";
+                    helement.innerText += " 課程點名模組";
+                    let nextline = document.createElement("br");
+                    stepbystep.appendChild(helement);
+                    stepbystep.appendChild(nextline);
+                    stepbystep.appendChild(nextline);
+                    stepnum++;
+                    stepbysteptodb += newmode + "/";
+                }else{
+                    alert("輸入資料有誤！請重新輸入");
+                }
+            }
+            else if(newmode==="vocabularyteach"){
+                var vocabularypackage = {{ categories|safe }};
+                var detailchoose = prompt("單字資料庫中現有的課程單元：\n" + vocabularypackage + "\n請輸入您所想加入的課程單元");
+                if(vocabularypackage.toString().match(detailchoose)){
+                    alert('新增' + detailchoose + "單字教學模組");
+                    let stepbystep = document.getElementById('stepbystep');
+                    let helement = document.createElement('h3')
+                    helement.id = "step"+stepnum.toString();
+                    helement.innerText = "Step " + stepnum.toString() + " : " + detailchoose;
+                    helement.style.display = "inline";
+                    helement.innerText += " 單字教學模組";
+                    let nextline = document.createElement("br");
+                    stepbystep.appendChild(helement);
+                    stepbystep.appendChild(nextline);
+                    stepbystep.appendChild(nextline);
+                    stepnum++;
+                    stepbysteptodb += newmode + "/";
+                }else{
+                    alert("輸入資料有誤！請重新輸入");
+                }
+            }
+            else if(newmode==="clock"){
+                var timetowait = prompt("請輸入休息時間時間(以分鐘為單位)：\n");
+                alert('新增時長為' + timetowait + "分鐘的休息時間模組");
+                let helement = document.createElement('h3')
+                helement.id = "step"+stepnum.toString();
+                helement.innerText = "Step " + stepnum.toString() + " : " + timetowait;
+                helement.style.display = "inline";
+                helement.innerText += " min休息時間模組";
+                let nextline = document.createElement("br");
+                stepbystep.appendChild(helement);
+                stepbystep.appendChild(nextline);
+                stepbystep.appendChild(nextline);
+                stepnum++;
+                stepbysteptodb += newmode + "/";
+            }
+            else if(newmode==="reading"){
+                var readinglessons = {{ readinglessons|safe }};
+                var detailchoose = prompt("閱讀資料庫中現有的課程單元：\n" + readinglessons + "\n請輸入您所想加入的課程單元");
+                if(readinglessons.toString().match(detailchoose)){
+                    alert('新增' + detailchoose + "課文教學模組");
+                    let stepbystep = document.getElementById('stepbystep');
+                    let helement = document.createElement('h3')
+                    helement.id = "step"+stepnum.toString();
+                    helement.innerText = "Step " + stepnum.toString() + " : " + detailchoose;
+                    helement.style.display = "inline";
+                    helement.innerText += " 課文教學模組";
+                    let nextline = document.createElement("br");
+                    stepbystep.appendChild(helement);
+                    stepbystep.appendChild(nextline);
+                    stepbystep.appendChild(nextline);
+                    stepnum++;
+                    stepbysteptodb += newmode + "/";
+                }else{
+                    alert("輸入資料有誤！請重新輸入");
+                }
+            }
+            else if(newmode==="quiz"){
+                var quizpackage = {{ quizpackages|safe }};
+                if(classidnowtosetdiscussion !== ""){
+                    var detailchoose = prompt("測驗資料庫中現有的課程單元：\n" + quizpackage + "\n請輸入您所想加入的課程單元");
+                    if(quizpackage.toString().match(detailchoose)){
+                        alert('新增' + detailchoose + "測驗模組");
+                        let stepbystep = document.getElementById('stepbystep');
+                        let helement = document.createElement('h3')
+                        helement.id = "step"+stepnum.toString();
+                        helement.innerText = "Step " + stepnum.toString() + " : " + detailchoose;
+                        helement.style.display = "inline";
+                        helement.innerText += " 測驗模組";
+                        let nextline = document.createElement("br");
+                        stepbystep.appendChild(helement);
+                        stepbystep.appendChild(nextline);
+                        stepbystep.appendChild(nextline);
+                        stepnum++;
+                        stepbysteptodb += newmode + "/";
+                    }else{
+                        alert("輸入資料有誤！請重新輸入");
+                    }
+                }else{
+                    alert("由於測驗模組將會抽點學生回答題目，所以需設定此課程的學生名單，請先新增點名模組以設定此課程的學生名單！謝謝~")
+                }
+
+            }
+            else if(newmode==="exercise"){
+                var exercises = {{ exercises|safe }};
+                var detailchoose = prompt("課堂活動資料庫中現有的活動名稱：\n" + exercises + "\n請輸入您所想加入的活動");
+                if(exercises.toString().match(detailchoose)){
+                    alert('新增' + detailchoose + "課堂活動模組");
+                    let stepbystep = document.getElementById('stepbystep');
+                    let helement = document.createElement('h3')
+                    helement.id = "step"+stepnum.toString();
+                    helement.innerText = "Step " + stepnum.toString() + " : " + detailchoose;
+                    helement.style.display = "inline";
+                    helement.innerText += " 課堂活動模組";
+                    let nextline = document.createElement("br");
+                    stepbystep.appendChild(helement);
+                    stepbystep.appendChild(nextline);
+                    stepbystep.appendChild(nextline);
+                    stepnum++;
+                    stepbysteptodb += newmode + "/";
+                }else{
+                    alert("輸入資料有誤！請重新輸入");
+                }
+            }
+            else if(newmode==="discussion"){
+                var issues = {{ issues|safe }};
+                if (classidnowtosetdiscussion!=""){
+                    $.ajax({
+                          url: "http://140.134.26.196/getclassinfo/?access=getgroups&classid="+classidnowtosetdiscussion,
+                          context: document.body,
+                          success: function (data){
+                              var groupdiscussion = [];
+                              alert("請點選確定並對"+classidnowtosetdiscussion+"課程中的各組學生指派小組討論的主題！")
+                              for(i=0; i<data.length; i++){
+                                  var detailchoose = prompt("小組討論資料庫中現有的討論議題：\n" + issues + "\n請輸入"+data[i].toString()+"的討論主題");
+                                  if(issues.toString().match(detailchoose)){
+                                      alert(data[i].toString()+"的討論主題為："+detailchoose);
+                                      groupdiscussion.push(data[i].toString() + " : " + detailchoose);
+                                  }else{
+                                      alert("輸入資料有誤！請重新輸入");
+                                      i--;
+                                  }
+                              }
+                              let stepbystep = document.getElementById('stepbystep');
+                              let helement = document.createElement('h3')
+                              helement.id = "step"+stepnum.toString();
+                              helement.innerText = "Step " + stepnum.toString() + " : 小組討論模組，各組討論主題依序為：\n" + groupdiscussion.join("\n");
+                              let nextline = document.createElement("br");
+                              stepbystep.appendChild(helement);
+                              stepbystep.appendChild(nextline);
+                              stepbystep.appendChild(nextline);
+                              stepnum++;
+                              stepbysteptodb += newmode + "/";
+                          }
+                    });
+                }else{
+                    alert("由於討論模組要求對各組學生分配討論主題，所以需設定此課程的學生名單，請先新增點名模組以設定此課程的學生名單！謝謝~");
+                }
+
+            }
+        }
+
+        function addnewattention(){
+            var attention = document.getElementById('attention').value;
+            let attentionlist = document.getElementById('attentionlist');
+            let helement = document.createElement('h3')
+            helement.id = "attention "+attentionnum.toString();
+            helement.innerText = attentionnum.toString() + ". " + attention;
+            helement.style.display = "inline";
+            let nextline = document.createElement("br");
+            attentionlist.appendChild(helement);
+            attentionlist.appendChild(nextline);
+            attentionlist.appendChild(nextline);
+            attentionnum++;
+        }
     </script>
     <title>Customize Class Info</title>
 </head>
 <body>
 
-此課程命名為：<input id="ClassName" size="10"><br><br>
-請排序以下模組功能（1為第一執行之模組功能，2為次，以此類推）<br><br>
-<input id="Checkstudent" size="1">  點名模組<br><br>
-<input id="TeachCustomizeVocabulary" size="1">  單字學習模組<br><br>
-<input id="ReadAloud" size="1">  課文模組<br><br>
-<input id="Test" size="1">  測驗模組<br><br>
-<input id="Activity" size="1">  課堂活動模組<br><br>
-<input id="Discussion" size="1">  小組討論模組<br><br>
-<br>
-        <table>
-          <tr>
-            <td align="left">
-              <form>
-                <a>請輸入Nao的IP位址(輕按Nao胸前的按鈕):</a>
-                <input id="naoip"><br><br>
-                <a>請輸入課程的日期與時間：</a>
-                <input id="startdatettime" type="datetime-local" name="startdatetime">
-                <br><br><input type="button" value="submit" onclick="setclassstarttime()">&nbsp;&nbsp;
-                <p id="demo"></p>
-              </form>
-            </td>
-          </tr>
-        </table>
+<h2 style="display: inline">此課程命名為：</h2>
+<input id="ClassName" size="10"><br><br>
 
+請依照您的需求輸入此課程的注意事項<br>(機器人將會在課程開始和課程結束時替您宣布)<br>
+<input id="attention" size="30" style="display: inline">
+<input class="submitbutton" type="button" value="新增注意事項" onclick="addnewattention()">
+<div id="attentionlist">
+
+</div><br><br><br>
+請依照您的需求依序新增模組至課程：
+<select id="mode" class="beautyselect">
+    <option value="" disabled selected hidden>模組類型</option>
+    <option value="studentcheck">點名模組</option>
+    <option value="vocabularyteach">單字教學模組</option>
+    <option value="reading">課文教學模組</option>
+    <option value="quiz">測驗模組</option>
+    <option value="exercise">課堂活動模組</option>
+    <option value="discussion">小組討論模組</option>
+    <option value="clock">休息時間模組</option>
+    <input class="submitbutton" type="button" value="Add to class" onclick="addnewmode()"><br><br>
+</select>
+
+<div id="stepbystep">
+
+</div>
+<br><br><br><input class="submitbutton" type="button" value="Save class" onclick="saveclass()"><br><br>
 </body>
 </html>

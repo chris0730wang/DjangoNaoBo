@@ -1,0 +1,107 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet"  type="text/css" href="{%  static  'css/style.css'  %}">
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
+    <title>Start Class</title>
+</head>
+<body>
+
+<div id="autoclasslist" align="center">
+
+</div>
+
+<script>
+        var autoclassinfo = JSON.parse('{{ serializersautoclasslist | safe }}');
+        getautoclass();
+
+        function startclass(classname){
+            var stepbystep, stepbystepdetail;
+            for(i=0; i<autoclassinfo.length; i++){
+                if(autoclassinfo[i].fields.classname===classname){
+                    $.ajax({
+                      url: "http://140.134.26.196/startautoclass/?classname="+classname,
+                      context: document.body,
+                      data: this.data,
+                      success: function (data) {
+
+                      }
+                    });
+                    stepbystep = autoclassinfo[i].fields.stepbystep.split("/");
+                    stepbystepdetail = autoclassinfo[i].fields.stepbystepdetail.split("/");
+                    switch (stepbystep[0]){
+                        case "studentcheck":
+                            window.location.assign("http://140.134.26.196/customizestudentslist/?classid="+stepbystepdetail[0]+"&classname="+classname+"&step=1");
+                            break;
+                        case "vocabularyteach":
+                            window.location.assign("http://140.134.26.196/teachcustomizevocabulary/?package="+stepbystepdetail[0]+"&classname="+classname+"&step=1");
+                            break;
+                        case "clock":
+                            window.location.assign("http://140.134.26.196/clock/?classname="+classname+"&step=1&min="+stepbystepdetail[0]);
+                            break;
+                        case "quiz":
+                            window.location.assign("http://140.134.26.196/customizequiz/?package="+stepbystepdetail[0]+"&classname="+classname+"&step=1");
+                            break;
+                        case "reading":
+                            window.location.assign("http://140.134.26.196/customizereading/?lesson="+stepbystepdetail[0]+"&classname="+classname+"&step=1");
+                            break;
+                        case"exercise":
+                            window.location.assign("http://140.134.26.196/customizeexercise/?exercisename="+stepbystepdetail[0]+"&classname="+classname+"&step=1");
+                            break;
+                        case"discussion":
+                            window.location.assign("http://140.134.26.196/customizediscussion/?issue="+stepbystepdetail[0]+"&classname="+classname+"&step=1");
+                    }
+                }
+            }
+        }
+
+        function AddButton(classname) {
+            var btn = document.createElement("BUTTON");
+            btn.innerText = "Start";
+            btn.onclick = function (){
+                startclass(classname);
+            }
+            btn.setAttribute("class", "pickonestudent");
+            btn.setAttribute("align", "left");
+            btn.setAttribute("target", "_blank");
+            btn.style.display = "block"
+            document.getElementById('autoclasslist').appendChild(btn);
+        }
+
+        function getautoclass(){
+            var showtable = document.getElementById("autoclasslist");
+            for (i=0; i<autoclassinfo.length; i++){
+                let classname = document.createElement("h1");
+                let stepbystep = document.createElement("h3");
+                let stepbystepstring;
+                let seperate = document.createTextNode("-------------------------------------------------------------------------------------------------");
+                let settime = document.createElement("h3");
+                settime.innerText = "設定於 ： " + autoclassinfo[i].fields.timezone.toString().substr(0,19);
+                classname.innerText = autoclassinfo[i].fields.classname;
+                stepbystepstring = autoclassinfo[i].fields.stepbysteptoshow.split("/");
+                showtable.appendChild(classname);
+                AddButton(autoclassinfo[i].fields.classname);
+                showtable.appendChild(settime);
+                for(j=0; j<stepbystepstring.length; j++){
+                    if(stepbystepstring[j].match("小組討論模組")){
+                        stepbystep.innerText += stepbystepstring[j].substring(0,stepbystepstring[j].indexOf("Group1"));
+                        var groupdis = stepbystepstring[j].substr(stepbystepstring[j].indexOf("Group1")).split("Group");
+                        for(k=1; k<groupdis.length; k++){
+                            groupdis[k] = "Group" + groupdis[k];
+                        }
+                        stepbystep.innerText += groupdis.join("\n");
+                        stepbystep.innerText += "\n";
+                        showtable.appendChild(stepbystep);
+                    }else{
+                        stepbystep.innerText += stepbystepstring[j] + "\n";
+                        showtable.appendChild(stepbystep);
+                    }
+                }
+                showtable.appendChild(seperate);
+            }
+        }
+    </script>
+</body>
+</html>

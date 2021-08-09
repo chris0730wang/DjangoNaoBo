@@ -65,11 +65,12 @@
               success: function (data){
                   jsnao.al_ats.setBodyLanguageMode(2);
                   jsnao.al_tts.setLanguage('English');
-                  jsnao.al_tts.setParameter("speed", 80)
+                  jsnao.al_tts.setParameter("speed", 80);
 
-                  for(i=0; i<4;i++){
+                  for(i=0; i<1;i++){
                       var Qoptionsnum = [data.Qnumof1[i], data.Qnumof2[i], data.Qnumof3[i], data.Qnumof4[i], data.Qnumof5[i]]
                       console.log(Qoptionsnum);
+                      jsnao.al_tts.say("I want to graduate.");
                       jsnao.al_tts.say("Question"+data.QNumber[i].toString());
                       jsnao.al_tts.say("\\\\pau=1500\\\\");
                       jsnao.al_tts.say(data.QQuestion[i].toString());

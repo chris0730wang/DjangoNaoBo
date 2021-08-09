@@ -17,7 +17,7 @@ from django.contrib import admin
 from django.urls import path, re_path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from myapp.views import pay, homepage, CustomizeClassInfo, setnaoipNET, getnaoipNET, sayhello, home, checkstudentNET, studentcheckNET, editcheck, pluspointNET, subpointNET, randompickstudentNET
+from myapp.views import pay, homepage, customizeclassinfopage, setnaoipNET, getnaoipNET, sayhello, home, checkstudentNET, studentcheckNET, editcheck, pluspointNET, subpointNET, randompickstudentNET
 from myapp.views import naoindexNET, vocabularypreviewresultNET, beforeyoureadresultNET, vocabularyreviewresultNET, focusoncontentresultNET
 from myapp.views import announcebeforeyoureadNET, getvocabularypreviewscoreNET, getvocabularyreviewscoreNET, getfocusoncontentscoreNET
 from myapp.views import announcevocabularypreviewNET, announcefocusoncontentNET, announcevocabularyreviewNET
@@ -25,7 +25,9 @@ from myapp.views import changesectiontocriticalthinking, changesectiontostudentc
 from myapp.views import checksection, vocabularypreviewdetail, focusoncontentdetail, vocabularyreviewdetail, readingNET, groupcheckok, getgroupstudents
 from myapp.views import getvocabularypreviewanswerNET, getvocabularyreviewanswerNET
 from myapp.views import getvocabularydetailNET, criticalthinkingrecord, announceuncheckedstudentNET, getstudentchecksituation, setclassstarttime, getnextstarttime, clock
-from myapp.views import teachcustomizevocabulary, customizestudentslist, customizestudentchangepoint, customizestudentchangecheck, customizerandompickstudent
+from myapp.views import teachcustomizevocabulary, customizestudentslist, customizestudentchangepoint, customizestudentchangecheck, customizerandompickstudent, customizequiz
+from myapp.views import zenbogetclassinfo, customizeclassinfosetting, startcustomizeautoclass, customizereading, customizeexercise, startautoclass, checkallgroupready, zenbogetready
+from myapp.views import zenbochecksection, customizestudentcheck, readingpartsettingandgetting, customizediscussion, zenbogetdiscussion
 urlpatterns = [
 
     path('admin/', admin.site.urls),
@@ -43,7 +45,7 @@ urlpatterns = [
     re_path(r'^randompickstudent/', randompickstudentNET),
     re_path(r'^naoindex/', naoindexNET),
     re_path(r'^reading/', readingNET),
-    re_path(r'^customizeclassinfo/', CustomizeClassInfo),
+    re_path(r'^customizeclassinfo/', customizeclassinfopage),
     re_path(r'^setnaoip/', setnaoipNET),
     re_path(r'^getnaoip/', getnaoipNET),
     re_path(r'^setstarttime/', setclassstarttime),
@@ -84,12 +86,27 @@ urlpatterns = [
     re_path(r'^groupcheckok/', groupcheckok),
     re_path(r'^getgroupstudents/', getgroupstudents),
 
+    # 更改後系統
     re_path(r'^teachcustomizevocabulary/', teachcustomizevocabulary),
     re_path(r'^customizestudentslist/', customizestudentslist),
     re_path(r'^changepoint/', customizestudentchangepoint),
     re_path(r'^changecheck/', customizestudentchangecheck),
-    re_path(r'^pickonestudent/', customizerandompickstudent)
-]# + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    re_path(r'^pickonestudent/', customizerandompickstudent),
+    re_path(r'^customizequiz/', customizequiz),
+    re_path(r'^setclassinfo/', customizeclassinfosetting),
+    re_path(r'^autoclasspage/', startcustomizeautoclass),
+    re_path(r'^customizereading/', customizereading),
+    re_path(r'^customizeexercise/', customizeexercise),
+    re_path(r'^startautoclass/', startautoclass),
+    re_path(r'^checkallgroupsready/', checkallgroupready),
+    re_path(r'^zenbogetready/', zenbogetready),
+    re_path(r'^getclassinfo/', zenbogetclassinfo),
+    re_path(r'^zenbochecksection/', zenbochecksection),
+    re_path(r'^zenbogetdiscussion/', zenbogetdiscussion),
+    re_path(r'^customizestudentcheck/', customizestudentcheck),
+    re_path(r'^readingpartsettingandgetting/', readingpartsettingandgetting),
+    re_path(r'^customizediscussion/', customizediscussion)
+]
 
 
 admin.site.site_header = "Django Administration"

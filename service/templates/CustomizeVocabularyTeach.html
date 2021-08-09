@@ -1,0 +1,200 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet"  type="text/css" href="{%  static  'css/style.css'  %}">
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="{% static 'js/socket.io.min.js' %}"></script>
+    <script type="text/javascript">
+        getnaoip();
+        function getnaoip(){
+            var naoiptoconnect="";
+            $.ajax({
+                  url: "http://140.134.26.196/getnaoip/",
+                  context: document.body,
+                  success: function(data){
+                      naoiptoconnect=data.IP;
+                  }
+              });
+            var nao_address = "192.168.0.101";
+            var jsQim = '/static/js/qimessaging.js';
+            if (nao_address == '') {
+                nao_address = '10.2.1.164';
+                jsQim = 'http://' + nao_address + jsQim;
+            }
+            $.getScript(jsQim, function() {
+                console.log('QiMessaging Library Loaded');
+                $.getScript('/static/js/jsnao.js', function() {
+                console.log('JsNAO Library Loaded');
+                $(document).ready(function() {
+                    jsnao.connect(naoiptoconnect);
+                    $('#RbtSay').keyup(function (e){
+                    if (e.keyCode == 13 /* Enter */) {
+                        jsnao.al_tts.say($('#RbtSay').val());
+                    }
+                    });
+                });
+                });
+            });
+        }
+    </script> <!-- nao 連線 -->
+    <script>
+        if (location.search.match("classname")){
+            setTimeout(function(){
+                autostartclass();
+                checkgroupsready();
+            },5000);
+        }
+
+        function checkgroupsready(){
+            $.ajax({
+              url: "http://140.134.26.196/checkallgroupsready/",
+              context: document.body,
+              success: function(data){
+                  console.log(data.result.toString());
+                  if(data.result === "ready"){
+                      gotonextstep();
+                  }else{
+                      setTimeout(checkgroupsready,10000);
+                  }
+              }
+          });
+        }
+
+        function gotonextstep(){
+            var classname = "{{classname|safe}}";
+            var nextstep = "{{nextstep|safe}}";
+            var nextstepdetail = "{{nextstepdetail|safe}}";
+            var stepnow = "{{stepnow}}";
+            switch (nextstep) {
+                case "vocabularyteach":
+                    window.location.assign("http://140.134.26.196/teachcustomizevocabulary/?step=" + (parseInt(stepnow) + 1).toString() + "&classname=" + classname + "&package=" + nextstepdetail);
+                    break;
+                case "clock":
+                    window.location.assign("http://140.134.26.196/clock/?step=" + (parseInt(stepnow) + 1).toString() + "&classname=" + classname + "&min=" + nextstepdetail);
+                    break;
+                case "studentcheck":
+                    window.location.assign("http://140.134.26.196/customizestudentslist/?step=" + (parseInt(stepnow) + 1).toString() + "&classname=" + classname + "&classid=" + nextstepdetail)
+                    break;
+                case "quiz":
+                    window.location.assign("http://140.134.26.196/customizequiz/?step=" + (parseInt(stepnow) + 1).toString() + "&classname=" + classname + "&package=" + nextstepdetail);
+                    break;
+                case "reading":
+                    window.location.assign("http://140.134.26.196/customizereading/?step=" + (parseInt(stepnow) + 1).toString() + "&classname=" + classname + "&lesson=" + nextstepdetail);
+                    break;
+                case"exercise":
+                    window.location.assign("http://140.134.26.196/customizeexercise/?step=" + (parseInt(stepnow) + 1).toString() + "&classname=" + classname + "&exercisename=" + nextstepdetail);
+                    break;
+                case"discussion":
+                    window.location.assign("http://140.134.26.196/customizediscussion/?step="+(parseInt(stepnow)+1).toString()+"&classname="+classname+"&issue="+nextstepdetail);
+                    break;
+                default:
+                    jsnao.al_tts.setLanguage("Chinese");
+                    jsnao.al_tts.say("此課程已經結束");
+                    var attention = "{{attention|safe}}";
+                    if(attention!==""){
+                        jsnao.al_tts.say("有幾點注意事項宣布");
+                        if(attention.match("/")){
+                            attention = attention.split("/");
+                            // console.log(attention[0]);
+                            for(var i=0; i<attention.length; i++){
+                                jsnao.al_tts.say(attention[i].toString()+"\\\\pau=2000\\\\");
+                            }
+                        }else{
+                            jsnao.al_tts.say(attention.toString()+"\\\\pau=2000\\\\");
+                        }
+                    }
+                    jsnao.al_tts.say("各位同學辛苦了");
+                    break;
+            }
+        }
+
+        async function autostartclass(){
+            jsnao.al_tts.setLanguage("English");
+            if(location.search.match("classname")){
+                var nextstep = "{{nextstep}}";
+                var nextstepdetail = "{{nextstepdetail}}";
+                var stepnow = "{{stepnow}}";
+                var classname = "{{classname}}";
+                if(stepnow==="1"){
+                    jsnao.al_tts.say("即將開始課程", "Chinese");
+                    var attention = "{{attention}}";
+                    if(attention!==""){
+                        jsnao.al_tts.say("首先有幾點注意事項宣布", "Chinese");
+                        if(attention.match("/")){
+                            attention = attention.split("/");
+                            // console.log(attention[0]);
+                            for(var i=0; i<attention.length; i++){
+                                jsnao.al_tts.say(attention[i].toString()+"\\\\pau=2000\\\\", "Chinese");
+                            }
+                        }else{
+                            jsnao.al_tts.say(attention.toString()+"\\\\pau=2000\\\\", "Chinese");
+                        }
+                    }
+                }
+                naoteachvocabularies();
+            }
+        }
+
+        function naoteachvocabularies(){
+            jsnao.al_tts.say("開始帶念單字，請同學們跟著我一起練習", "Chinese");
+            var vocabulariesdata = JSON.parse('{{ serializersvocabularies | safe }}')
+            var vocabulariesnum = 0;
+            jsnao.al_tts.setParameter("speed", 75);
+            for(i=0; i<vocabulariesdata.length; i++){
+                vocabulariesnum++;
+                jsnao.al_tts.say("\\\\pau=2000\\\\");
+                jsnao.al_tts.say(vocabulariesdata[i].fields.word.toString());
+                jsnao.al_tts.say("\\\\pau=2000\\\\");
+                jsnao.al_tts.say(vocabulariesdata[i].fields.word.toString());
+                jsnao.al_tts.say("\\\\pau=2500\\\\");
+                jsnao.al_tts.say(vocabulariesdata[i].fields.meaning.toString());
+            }
+            jsnao.al_tts.say("單字練習結束了！各位同學記得多加練習！\\\\pau=1000\\\\按下小布螢幕上的準備按鍵讓我們繼續下一階段的課程吧！")
+        }
+
+    </script>
+    <title>Vocabulary</title>
+</head>
+<body>
+<div align="center">
+    <form>
+    <select id="package" class="beautyselect">
+    <option value="" disabled selected hidden>課程單元</option>
+    {% for element in categories%}
+    <option value="package={{element}}">{{element}}</option>
+    {% endfor %}
+    <input class="submitbutton" type="button" value="Submit" onclick="showpage()"><br><br>
+</select>
+</form>
+</div>
+
+<table align="center" border="1" width="30%">
+  <caption style="font-family:DFKai-sb">{{package}}類別中的單字<br><br></caption>
+  <tr>
+    <th align="center">單字</th>
+    <th align="center">詞性</th>
+    <th align="center">英文解釋</th>
+  </tr>
+  {% for element in Vocabularies%}
+  <tr>
+    <td align="center">{{element.word}}</td>
+    <td align="center">{{element.partofspeech}}</td>
+    <td align="center">{{element.meaning}}</td>
+  </tr>
+  {% endfor %}
+</table>
+
+<script src = "//code.jquery.com/jquery-3.0.0.min.js"></script> <!-- add jquery library-->
+<script type = "text/javascript">
+
+function showpage(){
+    var sel = document.getElementById('package');
+    var packagename = sel.options[sel.selectedIndex].value;
+    window.location.href="http://140.134.26.196/teachcustomizevocabulary/?"+packagename;
+}
+
+</script>
+</body>
+</html>

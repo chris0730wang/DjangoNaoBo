@@ -1,0 +1,178 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet"  type="text/css" href="{%  static  'css/style.css'  %}">
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script type="text/javascript">
+        getnaoip();
+    function getnaoip(){
+            var naoiptoconnect="";
+            $.ajax({
+                  url: "http://140.134.26.196/getnaoip/",
+                  context: document.body,
+                  success: function(data){
+                      naoiptoconnect=data.IP;
+                  }
+              });
+            var nao_address = "192.168.0.101";
+            var jsQim = '/static/js/qimessaging.js';
+            if (nao_address == '') {
+                nao_address = '10.2.1.164';
+                jsQim = 'http://' + nao_address + jsQim;
+            }
+            $.getScript(jsQim, function() {
+                console.log('QiMessaging Library Loaded');
+                $.getScript('/static/js/jsnao.js', function() {
+                console.log('JsNAO Library Loaded');
+                $(document).ready(function() {
+                    jsnao.connect(naoiptoconnect);
+                    $('#RbtSay').keyup(function (e){
+                    if (e.keyCode == 13 /* Enter */) {
+                        jsnao.al_tts.say($('#RbtSay').val());
+                    }
+                    });
+                });
+                });
+            });
+        }
+    </script> <!-- nao 連線 -->
+    <title>Title</title>
+</head>
+<body>
+
+<script>
+    var readygroupsnum = 0;
+
+    if (location.search.match("classname")){
+        setTimeout(function(){
+            autostartclass();
+            checkgroupsready();
+        },7000);
+    }
+
+
+    function checkgroupsready(){
+        $.ajax({
+            url:"http://140.134.26.196/checkallgroupsready/",
+            context:document.body,
+            success:function(data){
+                console.log(data.result.toString());
+                if(data.result === "ready"){
+                      gotonextstep();
+                  }else{
+                    if(readygroupsnum !== parseInt(data.readygroupnum.toString())){
+                        jsnao.al_tts.say("謝謝這組的報告，接著請下一組回答，回答結束後請記得按下小布的準備按鍵哦！", "Chinese");
+                        // jsnao.al_ats.say("謝謝這組的報告，接著請下一組回答，回答結束後請記得按下小布的準備按鍵哦！");
+                    }
+                    console.log(readygroupsnum);
+                    readygroupsnum = parseInt(data.readygroupnum.toString());
+                    setTimeout(checkgroupsready,10000);
+                  }
+            }
+        });
+    }
+
+    function gotonextstep(){
+        var classname="{{classname|safe}}";
+        var nextstep="{{nextstep|safe}}";
+        var nextstepdetail="{{nextstepdetail|safe}}";
+        var stepnow="{{stepnow}}";
+        switch(nextstep){
+            case"vocabularyteach":
+                window.location.assign("http://140.134.26.196/teachcustomizevocabulary/?step="+(parseInt(stepnow)+1).toString()+"&classname="+classname+"&package="+nextstepdetail);
+                break;
+            case"clock":
+                window.location.assign("http://140.134.26.196/clock/?step="+(parseInt(stepnow)+1).toString()+"&classname="+classname+"&min="+nextstepdetail);
+                break;
+            case"studentcheck":
+                window.location.assign("http://140.134.26.196/customizestudentslist/?step="+(parseInt(stepnow)+1).toString()+"&classname="+classname+"&classid="+nextstepdetail)
+                break;
+            case"quiz":
+                window.location.assign("http://140.134.26.196/customizequiz/?step="+(parseInt(stepnow)+1).toString()+"&classname="+classname+"&package="+nextstepdetail);
+                break;
+            case"reading":
+                window.location.assign("http://140.134.26.196/customizereading/?step="+(parseInt(stepnow)+1).toString()+"&classname="+classname+"&lesson="+nextstepdetail);
+                break;
+            case"exercise":
+                window.location.assign("http://140.134.26.196/customizeexercise/?step="+(parseInt(stepnow)+1).toString()+"&classname="+classname+"&exercisename="+nextstepdetail);
+                break;
+            case"discussion":
+                window.location.assign("http://140.134.26.196/customizediscussion/?step="+(parseInt(stepnow)+1).toString()+"&classname="+classname+"&issue="+nextstepdetail);
+                break;
+            default:
+                jsnao.al_tts.say("此課程已經結束", "Chinese");
+                // jsnao.al_ats.say("此課程已經結束");
+                var attention="{{attention|safe}}";
+                if(attention!==""){
+                    jsnao.al_tts.say("有幾點注意事項宣布", "Chinese");
+                    // jsnao.al_ats.say("有幾點注意事項宣布");
+                    if(attention.match("/")){
+                        attention=attention.split("/");
+                        //console.log(attention[0]);
+                        for(var i=0;i<attention.length;i++){
+                            jsnao.al_tts.say(attention[i].toString()+"\\\\pau=2000\\\\", "Chinese");
+                            // jsnao.al_ats.say(attention[i].toString());
+                            // jsnao.al_ats._setMSPauseBeforeSpeech(2000);
+                        }
+                    }else{
+                        jsnao.al_tts.say(attention.toString()+"\\\\pau=2000\\\\", "Chinese");
+                        // jsnao.al_ats.say(attention.toString());
+                        // jsnao.al_ats._setMSPauseBeforeSpeech(2000);
+                    }
+                }
+                jsnao.al_tts.say("各位同學辛苦了", "Chinese");
+                // jsnao.al_ats.say("各位同學辛苦了");
+                break;
+        }
+    }
+
+    async function autostartclass() {
+        jsnao.al_tts.setLanguage("English")
+        if (location.search.match("classname")) {
+            var stepnow = "{{stepnow}}";
+            if(stepnow==="1"){
+                jsnao.al_tts.say("即將開始課程", "Chinese");
+                // jsnao.al_ats.say("即將開始課程");
+                var attention = "{{attention|safe}}";
+                if(attention!==""){
+                    jsnao.al_tts.say("首先有幾點注意事項宣布", "Chinese");
+                    // jsnao.al_ats.say("首先有幾點注意事項宣布");
+                    if(attention.match("/")){
+                        attention = attention.split("/");
+                        // console.log(attention[0]);
+                        for(var i=0; i<attention.length; i++){
+                            jsnao.al_tts.say(attention[i].toString()+"\\\\pau=2000\\\\", "Chinese");
+                            // jsnao.al_ats.say(attention[i].toString());
+                            // jsnao.al_ats._setMSPauseBeforeSpeech(2000);
+                        }
+                    }else{
+                        jsnao.al_tts.say(attention.toString()+"\\\\pau=2000\\\\", "Chinese");
+                        // jsnao.al_ats.say(attention.toString());
+                        // jsnao.al_ats._setMSPauseBeforeSpeech(2000);
+                    }
+                }
+            }
+            await naostartdiscussion();
+        }
+    }
+
+    function naostartdiscussion(){
+        var time="{{timetowait|safe}}";
+        timetowait = parseInt(time)*60*1000;
+        jsnao.al_tts.say("開始進行小組討論模組，請同學們查看小布的畫面，並依照螢幕上的題目跟範例答案討論出你們的答案！\\\\pau=2000\\\\", "Chinese")
+        jsnao.al_tts.say(time.toString()+"分鐘後請各組同學輪流發表看法\\\\pau="+timetowait+"\\\\", "Chinese");
+        jsnao.al_tts.say("請第一組指派一位同學發表你們討論過後的結果！發表結束後記得點選小布的準備按鍵哦！", "Chinese");
+        // jsnao.al_ats.say("開始進行小組討論模組，請同學們查看小布的畫面，並依照螢幕上的題目跟範例答案討論出你們的答案！");
+        // jsnao.al_ats._setMSPauseBeforeSpeech(2000);
+        // jsnao.al_ats.say(time.toString()+"分鐘後請各組同學輪流發表看法");
+        // jsnao.al_ats._setMSPauseBeforeSpeech(timetowait);
+        // jsnao.al_ats.say("請第一組指派一位同學發表你們討論過後的結果！發表結束後記得點選小布的準備按鍵哦！");
+        var groupsnum = {{groupsnum|safe}};
+        console.log(time + groupsnum);
+    }
+
+</script>
+</body>
+</html>

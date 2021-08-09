@@ -1,0 +1,157 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet"  type="text/css" href="{%  static  'css/style.css'  %}">
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script type="text/javascript">
+        getnaoip();
+    function getnaoip(){
+            var naoiptoconnect="";
+            $.ajax({
+                  url: "http://140.134.26.196/getnaoip/",
+                  context: document.body,
+                  success: function(data){
+                      naoiptoconnect=data.IP;
+                  }
+              });
+            var nao_address = "192.168.0.101";
+            var jsQim = '/static/js/qimessaging.js';
+            if (nao_address == '') {
+                nao_address = '10.2.1.164';
+                jsQim = 'http://' + nao_address + jsQim;
+            }
+            $.getScript(jsQim, function() {
+                console.log('QiMessaging Library Loaded');
+                $.getScript('/static/js/jsnao.js', function() {
+                console.log('JsNAO Library Loaded');
+                $(document).ready(function() {
+                    jsnao.connect(naoiptoconnect);
+                    $('#RbtSay').keyup(function (e){
+                    if (e.keyCode == 13 /* Enter */) {
+                        jsnao.al_tts.say($('#RbtSay').val());
+                    }
+                    });
+                });
+                });
+            });
+        }
+    </script> <!-- nao 連線 -->
+    <title>Title</title>
+</head>
+<body>
+<script>
+
+
+    if (location.search.match("classname")){
+        setTimeout(function(){
+            autostartclass();
+            checkgroupsready();
+        },7000);
+    }
+
+
+    function checkgroupsready(){
+        $.ajax({
+            url:"http://140.134.26.196/checkallgroupsready/",
+            context:document.body,
+            success:function(data){
+                console.log(data.result.toString());
+                setTimeout(function (){
+                    gotonextstep();
+                },15000)
+            }
+        });
+    }
+
+    function gotonextstep(){
+        var classname="{{classname|safe}}";
+        var nextstep="{{nextstep|safe}}";
+        var nextstepdetail="{{nextstepdetail|safe}}";
+        var stepnow="{{stepnow}}";
+        switch(nextstep){
+            case"vocabularyteach":
+                window.location.assign("http://140.134.26.196/teachcustomizevocabulary/?step="+(parseInt(stepnow)+1).toString()+"&classname="+classname+"&package="+nextstepdetail);
+                break;
+            case"clock":
+                window.location.assign("http://140.134.26.196/clock/?step="+(parseInt(stepnow)+1).toString()+"&classname="+classname+"&min="+nextstepdetail);
+                break;
+            case"studentcheck":
+                window.location.assign("http://140.134.26.196/customizestudentslist/?step="+(parseInt(stepnow)+1).toString()+"&classname="+classname+"&classid="+nextstepdetail)
+                break;
+            case"quiz":
+                window.location.assign("http://140.134.26.196/customizequiz/?step="+(parseInt(stepnow)+1).toString()+"&classname="+classname+"&package="+nextstepdetail);
+                break;
+            case"reading":
+                window.location.assign("http://140.134.26.196/customizereading/?step="+(parseInt(stepnow)+1).toString()+"&classname="+classname+"&lesson="+nextstepdetail);
+                break;
+            case"exercise":
+                window.location.assign("http://140.134.26.196/customizeexercise/?step="+(parseInt(stepnow)+1).toString()+"&classname="+classname+"&exercisename="+nextstepdetail);
+                break;
+            case"discussion":
+                window.location.assign("http://140.134.26.196/customizediscussion/?step="+(parseInt(stepnow)+1).toString()+"&classname="+classname+"&issue="+nextstepdetail);
+                break;
+            default:
+                jsnao.al_tts.say("此課程已經結束", "Chinese");
+                var attention="{{attention|safe}}";
+                if(attention!==""){
+                    jsnao.al_tts.say("有幾點注意事項宣布", "Chinese");
+                    if(attention.match("/")){
+                        attention=attention.split("/");
+                        //console.log(attention[0]);
+                        for(var i=0;i<attention.length;i++){
+                            jsnao.al_tts.say(attention[i].toString()+"\\\\pau=2000\\\\", "Chinese");
+                        }
+                    }else{
+                        jsnao.al_tts.say(attention.toString()+"\\\\pau=2000\\\\", "Chinese");
+                    }
+                }
+                jsnao.al_tts.say("各位同學辛苦了", "Chinese");
+                break;
+        }
+    }
+
+    async function autostartclass() {
+        jsnao.al_tts.setLanguage("English");
+        if (location.search.match("classname")) {
+            var stepnow = "{{stepnow}}";
+            if(stepnow==="1"){
+                jsnao.al_tts.say("即將開始課程", "Chinese");
+                var attention = "{{attention|safe}}";
+                if(attention!==""){
+                    jsnao.al_tts.say("首先有幾點注意事項宣布", "Chinese");
+                    if(attention.match("/")){
+                        attention = attention.split("/");
+                        // console.log(attention[0]);
+                        for(var i=0; i<attention.length; i++){
+                            jsnao.al_tts.say(attention[i].toString()+"\\\\pau=2000\\\\", "Chinese");
+                        }
+                    }else{
+                        jsnao.al_tts.say(attention.toString()+"\\\\pau=2000\\\\", "Chinese");
+                    }
+              }
+            }
+            await naoplaymusic();
+        }
+    }
+
+    function naoplaymusic(){
+        var musicdirectory="{{playingexercise|safe}}";
+        playid = jsnao.al_audio.playFile(musicdirectory);
+        console.log(jsnao.al_audio.getFileLength(playid));
+    }
+</script>
+<table align="center" border="1" width="30%">
+  <caption style="font-family:DFKai-sb">所有活動及音樂<br><br></caption>
+  <tr>
+    <th align="center">活動名稱</th>
+  </tr>
+  {% for element in Exerciseset%}
+  <tr>
+    <td align="center">{{element.exercisename}}</td>
+  </tr>
+  {% endfor %}
+</table>
+</body>
+</html>

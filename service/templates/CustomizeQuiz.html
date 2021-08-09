@@ -1,0 +1,244 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet"  type="text/css" href="{%  static  'css/style.css'  %}">
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script type="text/javascript">
+    getnaoip();
+    function getnaoip(){
+            var naoiptoconnect="";
+            $.ajax({
+                  url: "http://140.134.26.196/getnaoip/",
+                  context: document.body,
+                  success: function(data){
+                      naoiptoconnect=data.IP;
+                  }
+              });
+            var nao_address = "192.168.0.101";
+            var jsQim = '/static/js/qimessaging.js';
+            if (nao_address == '') {
+                nao_address = '10.2.1.164';
+                jsQim = 'http://' + nao_address + jsQim;
+            }
+            $.getScript(jsQim, function() {
+                console.log('QiMessaging Library Loaded');
+                $.getScript('/static/js/jsnao.js', function() {
+                console.log('JsNAO Library Loaded');
+                $(document).ready(function() {
+                    jsnao.connect(naoiptoconnect);
+                    $('#RbtSay').keyup(function (e){
+                    if (e.keyCode == 13 /* Enter */) {
+                        jsnao.al_tts.say($('#RbtSay').val());
+                    }
+                    });
+                });
+                });
+            });
+        }
+    </script> <!-- nao 連線 -->
+    <title>Question and Answer</title>
+</head>
+<body>
+<div align="center">
+    <form>
+    <select id="package" class="beautyselect">
+    <option value="" disabled selected hidden>課程單元</option>
+    {% for element in categories%}
+    <option value="package={{element}}">{{element}}</option>
+    {% endfor %}
+    <input class="submitbutton" type="button" value="Submit" onclick="showpage()"><br><br>
+</select>
+</form>
+</div>
+
+<table align="center" border="1" width="30%">
+  <caption style="font-family:DFKai-sb">{{package}}類別中的測驗題目以及答案<br><br></caption>
+  <tr>
+    <th align="center">題號</th>
+    <th align="center">題目</th>
+    <th align="center">選項一</th>
+    <th align="center">選項二</th>
+    <th align="center">選項三</th>
+    <th align="center">選項四</th>
+    <th align="center">正確答案</th>
+  </tr>
+  {% for element in Questionset%}
+  <tr>
+    <td align="center">{{element.questionnum}}</td>
+    <td align="center">{{element.question}}</td>
+    <td align="center">{{element.option1}}</td>
+    <td align="center">{{element.option2}}</td>
+    <td align="center">{{element.option3}}</td>
+    <td align="center">{{element.option4}}</td>
+    <td align="center">{{element.answer}}</td>
+  </tr>
+  {% endfor %}
+</table>
+
+<script src = "//code.jquery.com/jquery-3.0.0.min.js"></script> <!-- add jquery library-->
+<script type = "text/javascript">
+
+    var classid = "{{classid}}"
+    pickstudentforloop();
+    var pickstudents = [];
+
+    if (location.search.match("classname")){
+        setTimeout(function(){
+            autostartclass();
+            checkgroupsready();
+        },7000);
+    }
+
+    function checkgroupsready(){
+        $.ajax({
+          url: "http://140.134.26.196/checkallgroupsready/",
+          context: document.body,
+          success: function(data){
+              console.log(data.result.toString());
+              if(data.result === "ready"){
+                  gotonextstep();
+              }else{
+                  setTimeout(checkgroupsready,10000);
+              }
+          }
+      });
+    }
+
+    function gotonextstep(){
+        var classname = "{{classname|safe}}";
+        var nextstep = "{{nextstep|safe}}";
+        var nextstepdetail = "{{nextstepdetail|safe}}";
+        var stepnow = "{{stepnow}}";
+        switch (nextstep) {
+            case "vocabularyteach":
+                window.location.assign("http://140.134.26.196/teachcustomizevocabulary/?step=" + (parseInt(stepnow) + 1).toString() + "&classname=" + classname + "&package=" + nextstepdetail);
+                break;
+            case "clock":
+                window.location.assign("http://140.134.26.196/clock/?step=" + (parseInt(stepnow) + 1).toString() + "&classname=" + classname + "&min=" + nextstepdetail);
+                break;
+            case "studentcheck":
+                window.location.assign("http://140.134.26.196/customizestudentslist/?step=" + (parseInt(stepnow) + 1).toString() + "&classname=" + classname + "&classid=" + nextstepdetail)
+                break;
+            case "quiz":
+                window.location.assign("http://140.134.26.196/customizequiz/?step=" + (parseInt(stepnow) + 1).toString() + "&classname=" + classname + "&package=" + nextstepdetail);
+                break;
+            case "reading":
+                window.location.assign("http://140.134.26.196/customizereading/?step=" + (parseInt(stepnow) + 1).toString() + "&classname=" + classname + "&lesson=" + nextstepdetail);
+                break;
+            case "exercise":
+                window.location.assign("http://140.134.26.196/customizeexercise/?step=" + (parseInt(stepnow) + 1).toString() + "&classname=" + classname + "&exercisename=" + nextstepdetail);
+                break;
+            case "discussion":
+                window.location.assign("http://140.134.26.196/customizediscussion/?step="+(parseInt(stepnow)+1).toString()+"&classname="+classname+"&issue="+nextstepdetail);
+            default:
+                jsnao.al_tts.say("此課程已經結束", "Chinese");
+                var attention = "{{attention|safe}}";
+                if(attention!==""){
+                    jsnao.al_tts.say("有幾點注意事項宣布", "Chinese");
+                    if(attention.match("/")){
+                        attention = attention.split("/");
+                        // console.log(attention[0]);
+                        for(var i=0; i<attention.length; i++){
+                            jsnao.al_tts.say(attention[i].toString()+"\\\\pau=2000\\\\", "Chinese");
+                        }
+                    }else{
+                        jsnao.al_tts.say(attention.toString()+"\\\\pau=2000\\\\", "Chinese");
+                    }
+                }
+                jsnao.al_tts.say("各位同學辛苦了", "Chinese");
+                break;
+        }
+    }
+
+    function naoteachquiz(){
+        jsnao.al_tts.setLanguage("English");
+        jsnao.al_tts.setParameter("speed", 75);
+        return new Promise((resolve,reject)=>{
+            // jsnao.al_tts.say("開始進行測驗模組，每一題都會抽點一位同學回答哦！");
+            jsnao.al_tts.say("開始進行測驗模組，每一題都會抽點一位同學回答哦！", "Chinese");
+            var questionsdata = JSON.parse('{{ serializersquestions | safe }}');
+            var questionsnum = 0;
+            console.log(pickstudents);
+            for(i=0; i<questionsdata.length; i++){
+                questionsnum++;
+                jsnao.al_tts.say(pickstudents[i] + "請準備回答", "Chinese");
+                jsnao.al_tts.say("\\\\pau=5000\\\\");
+                jsnao.al_tts.say(questionsdata[i].fields.question.toString());
+                jsnao.al_tts.say("\\\\pau=10000\\\\");
+                jsnao.al_tts.say("The answer is \\\\pau=1000\\\\" + questionsdata[i].fields.answer.toString() + "\\\\pau=1000\\\\");
+                // jsnao.al_ats.say(pickstudents[i] + "請準備回答");
+                // jsnao.al_tts.setLanguage("English");
+                // jsnao.al_ats._setMSPauseBeforeSpeech(6000);
+                // jsnao.al_ats.say(questionsdata[i].fields.question.toString());
+                // jsnao.al_ats._setMSPauseBeforeSpeech(10000);
+                // jsnao.al_ats.say("The answer is");
+                // jsnao.al_ats._setMSPauseBeforeSpeech(1000);
+                // jsnao.al_ats.say(questionsdata[i].fields.answer.toString());
+                // jsnao.al_ats._setMSPauseBeforeSpeech(1000);
+            }
+            jsnao.al_tts.say("測驗結束，沒有被抽點到的同學也要記得練習喔！\\\\pau=1000\\\\請各組同學點選小布螢幕上的準備按鍵，讓我們繼續下一階段的課程！", "Chinese");
+            //here our function should be implemented
+            setTimeout(()=>{
+                resolve();
+            ;} , 30000*questionsnum
+            );
+        });
+    }
+
+    async function autostartclass() {
+        jsnao.al_tts.setLanguage("English")
+        if (location.search.match("classname")) {
+            var nextstep = "{{nextstep}}";
+            var nextstepdetail = "{{nextstepdetail}}";
+            var stepnow = "{{stepnow}}";
+            var classname = "{{classname}}";
+            if(stepnow==="1"){
+                jsnao.al_tts.say("即將開始課程", "Chinese");
+                var attention = "{{attention|safe}}";
+                if(attention!==""){
+                    jsnao.al_tts.say("首先有幾點注意事項宣布", "Chinese");
+                    if(attention.match("/")){
+                        attention = attention.split("/");
+                        // console.log(attention[0]);
+                        for(var i=0; i<attention.length; i++){
+                            jsnao.al_tts.say(attention[i].toString()+"\\\\pau=2000\\\\", "Chinese");
+                        }
+                    }else{
+                        jsnao.al_tts.say(attention.toString()+"\\\\pau=2000\\\\", "Chinese");
+                    }
+              }
+            }
+            await naoteachquiz();
+        }
+    }
+
+    function pickstudentforloop(){
+        var questionsdata = JSON.parse('{{ serializersquestions | safe }}')
+        for(i=0; i<questionsdata.length; i++){
+            randompickstudent(i);
+        }
+    }
+
+    function randompickstudent(index){
+        $.ajax({
+                url: "http://140.134.26.196/pickonestudent/?group=all&classid="+classid,
+                context: document.body,
+                data: this.data,
+                success: function (data){
+                    pickstudents.push(data.pickedstudent.toString());
+                    // window.location.reload();
+                }
+        });
+    }
+
+    function showpage(){
+        var sel = document.getElementById('package');
+        var packagename = sel.options[sel.selectedIndex].value;
+        window.location.href="http://140.134.26.196/customizequiz/?"+packagename;
+    }
+
+</script>
+</body>
+</html>

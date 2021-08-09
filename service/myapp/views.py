@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from .models import Pay, studentcheck, VocabularyPreview, U10R1VocabularyPreviewAns, U10R2VocabularyPreviewAns
 from .models import BeforeYouRead, U10BeforeYouReadAns, FocusOnContent, U10R1FocusonContentAns, U10R2FocusonContentAns
 from .models import VocabularyReview, U10R1VocabularyReviewAns, U10R2VocabularyReviewAns, VocabularyDetail, SetNaoIP, SetStartTime
-from .models import CustomizeStudentList, CustomizeVocabulary
+from .models import CustomizeStudentList, CustomizeVocabulary, CustomizeQuiz, CustomizeClassInfo, CustomizeReading, CustomizeExerciseInfo, CustomizeDiscussion
 from django.http import HttpResponse, JsonResponse
 from django.core.exceptions import ObjectDoesNotExist
 from datetime import datetime
@@ -51,10 +51,6 @@ def pay(request):
 def homepage(request):
     return render(request, "homepage.html", locals())
 
-# 設定Nao IP的網頁
-def CustomizeClassInfo(request):
-    return render(request, "CustomizeClassInfo.html", locals())
-
 # 設定Nao IP的url
 def setnaoipNET(request):
     naoip = request.GET.get('ip')
@@ -100,11 +96,6 @@ def hello2(request,username):
 # 之前測試用，無用處
 def naoindexNET(request):
     return render(request, "naoindex.html", locals())
-
-# 計時時鐘
-def clock(request):
-    sec = request.GET.get('sec')
-    return render(request, "clock.html", locals())
 
 # 首頁
 @csrf_exempt
@@ -967,7 +958,7 @@ def vocabularypreviewdetail(request):
                     count += 1
         if count == 0:
             count = 1
-        avg = total / count
+        avg = round(total / count, 2)
         return avg
 
     def savepoint(group, reading):
@@ -1806,11 +1797,75 @@ def getgroupstudents(request):
             {'student1': students[0].cId, 'student2': students[1].cId, 'student3': students[2].cId,
              'student4': students[3].cId, 'student5': students[4].cId, 'student6': students[5].cId})
 
+
+# 更改後系統
+
+nowautoclassname = 0
+nowclassid = 0
+groupsready = []
+customizesection = []
+customizediscussion = []
+stepnow = 0
+readingpart = 0
+
+# 各組全部變成unready (Normal Function)
+def init_groupsready():
+    global groupsready
+    for i in range(len(groupsready)):
+        groupsready[i] = "unready"
+    print(str(groupsready))
+
+# 各組切換狀態 (Normal Function)
+def changesection(group, section):
+    global stepnow
+    global customizesection
+    if group != "startall":
+        stepnow += 1
+        for i in range(len(customizesection)):
+            customizesection[i] = section
+    else:
+        for i in range(len(customizesection)):
+            customizesection[i] = section
+    print(str(customizesection))
+    print(stepnow)
+
+# 授課教師匯入名單後的點名系統
+def customizestudentslist(request):
+    changesection("all", "studentcheck")
+    classid = request.GET.get('classid')
+    if classid != None:
+        StudentsList = CustomizeStudentList.objects.filter(classid=classid)
+        serializersstudentlist = serializers.serialize("json", StudentsList)
+    classids = []
+    classidname = ""
+    randomset = CustomizeStudentList.objects.filter(~Q(classid=classidname)).order_by('id')
+    while 1:
+        randomset = randomset.filter(~Q(classid=classidname)).order_by('id')
+        randomone = randomset.first()
+        classidname = randomone.classid
+        classids.append(classidname)
+        if randomset.filter(~Q(classid=classidname)).count() == 0:
+            break
+    classname = request.GET.get('classname')
+    if classname != None:
+        stepnow = request.GET.get('step')
+        autoclass = CustomizeClassInfo.objects.get(classname=classname)
+        stepbystep = autoclass.stepbystep.split('/')
+        stepbystepdetail = autoclass.stepbystepdetail.split('/')
+        attention = autoclass.attention
+        if int(stepnow) != len(stepbystep):
+            nextstep = stepbystep[int(stepnow) - 1 + 1]
+            nextstepdetail = stepbystepdetail[int(stepnow) - 1 + 1]
+        print("stepnow : " + stepnow)
+    return render(request, "CustomizeStudents.html", locals())
+
 # 授課教師匯入後的單字教學
 def teachcustomizevocabulary(request):
+    changesection("all", "vocabularyteach")
     package = request.GET.get('package')
     if package != None:
         Vocabularies = CustomizeVocabulary.objects.filter(package=package)
+        serializersvocabularies = serializers.serialize("json", Vocabularies)
     categories = []
     packagename = ""
     randomset = CustomizeVocabulary.objects.filter(~Q(package=packagename)).order_by('id')
@@ -1821,27 +1876,185 @@ def teachcustomizevocabulary(request):
         categories.append(packagename)
         if randomset.filter(~Q(package=packagename)).count() == 0:
             break
+    classname = request.GET.get('classname')
+    if classname != None:
+        stepnow = request.GET.get('step')
+        autoclass = CustomizeClassInfo.objects.get(classname=classname)
+        stepbystep = autoclass.stepbystep.split('/')
+        stepbystepdetail = autoclass.stepbystepdetail.split('/')
+        attention = autoclass.attention
+        if int(stepnow) != len(stepbystep):
+            nextstep = stepbystep[int(stepnow) - 1 + 1]
+            nextstepdetail = stepbystepdetail[int(stepnow) - 1 + 1]
+            print("stepnow : " + stepnow)
+    return render(request, "CustomizeVocabularyTeach.html", locals())
 
-    return render(request, "TeachCustomizeVocabulary.html", locals())
-
-# 授課教師匯入名單後的點名系統
-def customizestudentslist(request):
-    classid = request.GET.get('classid')
-    if classid != None:
-        StudentsList = CustomizeStudentList.objects.filter(classid=classid)
-        serializersstudentlist = serializers.serialize("json", StudentsList)
-    classids = []
-    classidname = ""
-    randomset = CustomizeStudentList.objects.filter(~Q(classid=classidname)).order_by('id')
-    while 1 :
-        randomset = randomset.filter(~Q(classid=classidname)).order_by('id')
+# 授課教師匯入題目選項答案後教學
+def customizequiz(request):
+    changesection("all", "quiz")
+    package = request.GET.get('package')
+    if package != None:
+        Questionset = CustomizeQuiz.objects.filter(package=package)
+        serializersquestions = serializers.serialize("json", Questionset)
+    categories = []
+    packagename = ""
+    randomset = CustomizeQuiz.objects.filter(~Q(package=packagename)).order_by('id')
+    while 1:
+        randomset = randomset.filter(~Q(package=packagename)).order_by('id')
         randomone = randomset.first()
-        classidname = randomone.classid
-        classids.append(classidname)
-        if randomset.filter(~Q(classid=classidname)).count()==0:
+        packagename = randomone.package
+        categories.append(packagename)
+        if randomset.filter(~Q(package=packagename)).count() == 0:
             break
+    classname = request.GET.get('classname')
+    if classname != None:
+        stepnow = request.GET.get('step')
+        autoclass = CustomizeClassInfo.objects.get(classname=classname)
+        stepbystep = autoclass.stepbystep.split('/')
+        stepbystepdetail = autoclass.stepbystepdetail.split('/')
+        attention = autoclass.attention
+        i = 0
+        for step in stepbystep:
+            if step == "studentcheck":
+                classid = stepbystepdetail[i]
+            else:
+                i += 1
+        if int(stepnow) != len(stepbystep):
+            nextstep = stepbystep[int(stepnow) - 1 + 1]
+            nextstepdetail = stepbystepdetail[int(stepnow) - 1 + 1]
+        print("stepnow : " + stepnow)
+    return render(request, "CustomizeQuiz.html", locals())
 
-    return render(request, "CustomizeStudents.html", locals())
+# 授課教師匯入課程音檔等
+def customizereading(request):
+    changesection("all", "reading")
+    init_groupsready()
+    lesson = request.GET.get('lesson')
+    print(lesson)
+    if lesson != None:
+        Teachlesson = CustomizeReading.objects.filter(lesson=lesson)
+        serializersteachlesson = serializers.serialize("json", Teachlesson)
+    readinglessons = []
+    lessonname = ""
+    randomset = CustomizeReading.objects.filter(~Q(lesson=lessonname)).order_by('id')
+    while 1:
+        randomset = randomset.filter(~Q(lesson=lessonname)).order_by('id')
+        randomone = randomset.first()
+        lessonname = randomone.lesson
+        readinglessons.append(lessonname)
+        if randomset.filter(~Q(lesson=lessonname)).count() == 0:
+            break
+    classname = request.GET.get('classname')
+    if classname != None:
+        stepnow = request.GET.get('step')
+        autoclass = CustomizeClassInfo.objects.get(classname=classname)
+        stepbystep = autoclass.stepbystep.split('/')
+        stepbystepdetail = autoclass.stepbystepdetail.split('/')
+        attention = autoclass.attention
+        i = 0
+        for step in stepbystep:
+            if step == "studentcheck":
+                classid = stepbystepdetail[i]
+            else:
+                i += 1
+        if int(stepnow) != len(stepbystep):
+            nextstep = stepbystep[int(stepnow) - 1 + 1]
+            nextstepdetail = stepbystepdetail[int(stepnow) - 1 + 1]
+        print("stepnow : " + stepnow)
+    return render(request, "customizereading.html", locals())
+
+# reading課程中教到第幾段
+def readingpartsettingandgetting(request):
+    global stepnow
+    global nowautoclassname
+    global readingpart
+    nowautoclass = CustomizeClassInfo.objects.get(classname=nowautoclassname)
+    nowautoclassstepbystepdetail = nowautoclass.stepbystepdetail.split('/')
+    print(stepnow)
+    nowlesson = nowautoclassstepbystepdetail[stepnow-1]
+    print(nowlesson)
+    nowreading = CustomizeReading.objects.filter(lesson=nowlesson)
+    access = request.GET.get('access')
+    if access == "setting":
+        readingpart = int(request.GET.get('part'))
+        return JsonResponse({"result": "OK"})
+    elif access == "getting":
+        nowreading = nowreading.get(part=readingpart)
+        return JsonResponse({"result": nowreading.readingexplanationaudio})
+
+# 課堂活動(帶動唱)
+def customizeexercise(request):
+    changesection("all", "exercise")
+    exercise = request.GET.get('exercisename')
+    Exerciseset = CustomizeExerciseInfo.objects.all()
+    if exercise != None:
+        playingexercise = CustomizeExerciseInfo.objects.get(exercisename=exercise).musicdirectory
+    exercises = []
+    exercisename = ""
+    randomset = CustomizeExerciseInfo.objects.filter(~Q(exercisename=exercisename)).order_by('id')
+    while 1:
+        randomset = randomset.filter(~Q(exercisename=exercisename)).order_by('id')
+        randomone = randomset.first()
+        exercisename = randomone.exercisename
+        exercises.append(exercisename)
+        if randomset.filter(~Q(exercisename=exercisename)).count() == 0:
+            break
+    classname = request.GET.get('classname')
+    if classname != None:
+        stepnow = request.GET.get('step')
+        autoclass = CustomizeClassInfo.objects.get(classname=classname)
+        stepbystep = autoclass.stepbystep.split('/')
+        stepbystepdetail = autoclass.stepbystepdetail.split('/')
+        attention = autoclass.attention
+        i = 0
+        for step in stepbystep:
+            if step == "studentcheck":
+                classid = stepbystepdetail[i]
+            else:
+                i += 1
+        if int(stepnow) != len(stepbystep):
+            nextstep = stepbystep[int(stepnow) - 1 + 1]
+            nextstepdetail = stepbystepdetail[int(stepnow) - 1 + 1]
+        print("stepnow : " + stepnow)
+    return render(request, "CustomizeExercise.html", locals())
+
+# 計時時鐘
+def clock(request):
+    classname = request.GET.get('classname')
+    if classname != None:
+        stepnow = request.GET.get('step')
+        autoclass = CustomizeClassInfo.objects.get(classname=classname)
+        stepbystep = autoclass.stepbystep.split('/')
+        stepbystepdetail = autoclass.stepbystepdetail.split('/')
+        attention = autoclass.attention
+        if int(stepnow) != len(stepbystep):
+            nextstep = stepbystep[int(stepnow) - 1 + 1]
+            nextstepdetail = stepbystepdetail[int(stepnow) - 1 + 1]
+        print("stepnow : " + stepnow)
+    return render(request, "clock.html", locals())
+
+# 小組討論
+def customizediscussion(request):
+    changesection("all", "discussion")
+    getissue = request.GET.get('issue')
+    discussionissues = getissue.split('\\')
+    print(discussionissues)
+    timetowait = 0
+    for issue in discussionissues:
+        if CustomizeDiscussion.objects.get(issuename=issue).time > timetowait:
+            timetowait = CustomizeDiscussion.objects.get(issuename=issue).time
+    classname = request.GET.get('classname')
+    if classname != None:
+        stepnow = request.GET.get('step')
+        autoclass = CustomizeClassInfo.objects.get(classname=classname)
+        stepbystep = autoclass.stepbystep.split('/')
+        stepbystepdetail = autoclass.stepbystepdetail.split('/')
+        attention = autoclass.attention
+        if int(stepnow) != len(stepbystep):
+            nextstep = stepbystep[int(stepnow) - 1 + 1]
+            nextstepdetail = stepbystepdetail[int(stepnow) - 1 + 1]
+    groupsnum = len(groupsready)
+    return render(request, "CustomizeDiscussion.html", locals())
 
 # 授課教師匯入名單後加減分
 def customizestudentchangepoint(request):
@@ -1875,5 +2088,207 @@ def customizerandompickstudent(request):
     else:
         pickedstudent = CustomizeStudentList.objects.filter(classid=classid, studentgroup=group).order_by('?').first()
     return JsonResponse({'pickedstudent': pickedstudent.studentname})
+
+# 設定課程模組的網頁
+def customizeclassinfopage(request):
+    classids = []
+    classidname = ""
+    randomset = CustomizeStudentList.objects.filter(~Q(classid=classidname)).order_by('id')
+    while 1:
+        randomset = randomset.filter(~Q(classid=classidname)).order_by('id')
+        randomone = randomset.first()
+        classidname = randomone.classid
+        classids.append(classidname)
+        if randomset.filter(~Q(classid=classidname)).count()==0:
+            break
+    categories = []
+    packagename = ""
+    randomset = CustomizeVocabulary.objects.filter(~Q(package=packagename)).order_by('id')
+    while 1:
+        randomset = randomset.filter(~Q(package=packagename)).order_by('id')
+        randomone = randomset.first()
+        packagename = randomone.package
+        categories.append(packagename)
+        if randomset.filter(~Q(package=packagename)).count() == 0:
+            break
+    quizpackages = []
+    packagename = ""
+    randomset = CustomizeQuiz.objects.filter(~Q(package=packagename)).order_by('id')
+    while 1:
+        randomset = randomset.filter(~Q(package=packagename)).order_by('id')
+        randomone = randomset.first()
+        packagename = randomone.package
+        quizpackages.append(packagename)
+        if randomset.filter(~Q(package=packagename)).count() == 0:
+            break
+    readinglessons = []
+    lessonname = ""
+    randomset = CustomizeReading.objects.filter(~Q(lesson=lessonname)).order_by('id')
+    while 1:
+        randomset = randomset.filter(~Q(lesson=lessonname)).order_by('id')
+        randomone = randomset.first()
+        lessonname = randomone.lesson
+        readinglessons.append(lessonname)
+        if randomset.filter(~Q(lesson=lessonname)).count() == 0:
+            break
+    exercises = []
+    exercisename = ""
+    randomset = CustomizeExerciseInfo.objects.filter(~Q(exercisename=exercisename)).order_by('id')
+    while 1:
+        randomset = randomset.filter(~Q(exercisename=exercisename)).order_by('id')
+        randomone = randomset.first()
+        exercisename = randomone.exercisename
+        exercises.append(exercisename)
+        if randomset.filter(~Q(exercisename=exercisename)).count() == 0:
+            break
+    issues = []
+    issuename = ""
+    randomset = CustomizeDiscussion.objects.filter(~Q(issuename=issuename)).order_by('id')
+    while 1:
+        randomset = randomset.filter(~Q(issuename=issuename)).order_by('id')
+        randomone = randomset.first()
+        issuename = randomone.issuename
+        issues.append(issuename)
+        if randomset.filter(~Q(issuename=issuename)).count() == 0:
+            break
+    return render(request, "CustomizeClassInfo.html", locals())
+
+# 將設定好流程的課程存至資料庫
+def customizeclassinfosetting(request):
+    classname = request.GET.get('classname')
+    stepbystep = request.GET.get('stepbystep')
+    stepbystepdetail = request.GET.get('stepbystepdetail')
+    stepbysteptoshow = request.GET.get('stepbysteptoshow')
+    attention = request.GET.get('attention')
+    CustomizeClassInfo.objects.create(classname=classname, stepbystep=stepbystep, stepbystepdetail=stepbystepdetail, stepbysteptoshow=stepbysteptoshow, attention=attention)
+    return JsonResponse({'responsemessage': "已儲存課程！"})
+
+# 將已設定好的流程的課程供授課教師選擇執行
+def startcustomizeautoclass(request):
+    AutoClassInfo = CustomizeClassInfo.objects.all().order_by('id').reverse()
+    serializersautoclasslist = serializers.serialize("json", AutoClassInfo)
+    return render(request, "StartAutoClass.html", locals())
+
+# 開始全自動課程
+def startautoclass(request):
+    global stepnow
+    stepnow = 0
+    global customizesection
+    customizesection.clear()
+    global customizediscussion
+    customizediscussion = []
+    global nowautoclassname
+    global nowclassid
+    global groupsready
+    groupsready = []
+    nowautoclassname = request.GET.get('classname')
+    theclass = CustomizeClassInfo.objects.get(classname=nowautoclassname)
+    stepbystep = theclass.stepbystep.split('/')
+    stepbystepdetail = theclass.stepbystepdetail.split('/')
+    i = 0
+    for step in stepbystep:
+        if step == "studentcheck":
+            nowclassid = stepbystepdetail[i]
+        else:
+            if step == "discussion":
+                everygroupdiscussion = stepbystepdetail[i].split('\\\\')
+                for dis in everygroupdiscussion:
+                    customizediscussion.append(dis)
+            print(customizediscussion)
+        i += 1
+    group = 0
+    randomset = CustomizeStudentList.objects.filter(classid=nowclassid).filter(~Q(studentgroup=group)).order_by('id')
+    while 1:
+        randomset = randomset.filter(~Q(studentgroup=group)).order_by('id')
+        randomone = randomset.first()
+        group = randomone.studentgroup
+        groupsready.append("unready")
+        customizesection.append("section")
+        if randomset.filter(~Q(studentgroup=group)).count() == 0:
+            break
+    print("\n" + nowautoclassname + "/" + nowclassid + "\n")
+    changesection("startall", stepbystep[0])
+    return JsonResponse({'result': "OK !"})
+
+# Zenbo App 存取課程編號、組別、名單
+def zenbogetclassinfo(request):
+    access = request.GET.get('access')
+    if access == "getclassid":
+        classids = []
+        classidname = ""
+        randomset = CustomizeStudentList.objects.filter(~Q(classid=classidname)).order_by('id')
+        while 1:
+            randomset = randomset.filter(~Q(classid=classidname)).order_by('id')
+            randomone = randomset.first()
+            classidname = randomone.classid
+            classids.append(classidname)
+            if randomset.filter(~Q(classid=classidname)).count() == 0:
+                break
+        return JsonResponse(classids, safe=False)
+    elif access == "getgroups":
+        classid = request.GET.get('classid')
+        studentlist = CustomizeStudentList.objects.filter(classid=classid)
+        groupsnumlist = []
+        group = 0
+        randomset = studentlist.filter(~Q(studentgroup=group)).order_by('id')
+        while 1:
+            randomset = randomset.filter(~Q(studentgroup=group)).order_by('id')
+            randomone = randomset.first()
+            group = randomone.studentgroup
+            groupsnumlist.append("Group"+str(group))
+            if randomset.filter(~Q(studentgroup=group)).count() == 0:
+                break
+        return JsonResponse(groupsnumlist, safe=False)
+    elif access == "getstudentlist":
+        classid = request.GET.get('classid')
+        group = request.GET.get('group')
+        studentlist = CustomizeStudentList.objects.filter(classid=classid, studentgroup=int(group))
+        studentidlist = []
+        for student in studentlist:
+            studentidlist.append(student.studentid)
+        return JsonResponse(studentidlist, safe=False)
+
+# Zenbo App ready
+def zenbogetready(request):
+    global groupsready
+    group = request.GET.get('group')
+    groupsready[int(group)-1] = 'ready'
+    return JsonResponse({"result": "OK !"})
+
+# Zenbo Check Section
+def zenbochecksection(request):
+    global customizesection
+    group = request.GET.get('group')
+    return JsonResponse({'section': customizesection[int(group)-1]})
+
+# Zenbo 提取對應組別的討論主題
+def zenbogetdiscussion(request):
+
+    global customizediscussion
+    group = request.GET.get('group')
+    discussion = customizediscussion[int(group)-1]
+    issue = CustomizeDiscussion.objects.get(issuename=discussion).issue
+    sampleanswer = CustomizeDiscussion.objects.get(issuename=discussion).sampleanswer
+    return JsonResponse({'issue': issue, "sampleanswer": sampleanswer})
+
+# 新系統學生藉由zenbo junior簽到
+def customizestudentcheck(request):
+    cId = request.GET.get('cId')
+    student = CustomizeStudentList.objects.get(studentid=cId)
+    student.studentcheck = "已簽到"
+    student.save()
+    return JsonResponse({'cId': student.studentid, 'cName': student.studentname, 'cGroup': student.studentgroup})
+
+# Nao檢查每組是否都準備進行下一階段
+def checkallgroupready(request):
+    global groupsready
+    readygroup = 0
+    for group in groupsready:
+        if group == "ready":
+            readygroup += 1
+    if readygroup != len(groupsready):
+        return JsonResponse({"result": "unready", "readygroupnum": readygroup})
+    init_groupsready()
+    return JsonResponse({"result": "ready"})
 
 # Create your views here.

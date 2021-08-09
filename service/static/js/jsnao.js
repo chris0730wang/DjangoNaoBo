@@ -4,17 +4,15 @@ var jsnao = {
   sname : null,
   coords : { x: 0, y: 0},
   session : null,
-  sessionsuccess : null,
   naoip : null,
   al_sys : null,
   al_tts : null,
   al_ats : null,
-  al_video : null,
   al_motion : null,
   al_posture : null,
-  al_led : null,
-  al_autonomous : null,
+  al_audiodevice : null,
   al_audio : null,
+  al_module : null,
   log_listener : null,
   log_level : 4,
   error : function(data) { console.log(data) },
@@ -28,18 +26,21 @@ var jsnao = {
     console.log('Session Connected.');
     jsnao.session.service("ALSystem").done(jsnao.init_system);
     jsnao.session.service("ALMotion").done(jsnao.init_motion);
-    jsnao.session.service("ALVideoDevice").done(jsnao.init_video);
     jsnao.session.service("ALTextToSpeech").done(jsnao.init_tts);
     jsnao.session.service("ALRobotPosture").done(jsnao.init_posture);
-    jsnao.session.service("ALLeds").done(jsnao.init_led);
-    jsnao.session.service("ALAutonomousMoves").done(jsnao.init_autonomous);
     jsnao.session.service("ALAnimatedSpeech").done(jsnao.init_animated);
     jsnao.session.service("ALAudioPlayer").done(jsnao.init_audioplayer);
+    jsnao.session.service("ALModule").fail(jsnao.init_almodule);
+    jsnao.session.service("ALAudioDevice").done(jsnao.init_audiodevice);
+  },
+  init_audiodevice : function (data){
+    jsnao.al_audiodevice = data;
   },
   init_tts : function(data) {
     jsnao.al_tts = data;
     jsnao.al_tts.getLanguage().done(function(data) { $('#imgLang').attr('src', jsnao.getLangImage(data)); });
     $('#DivTts').show();
+    console.log(data);
     console.log('Text To Speech Initialized.');
   },
   init_system : function(data) {
@@ -66,28 +67,19 @@ var jsnao = {
     $('#DivPosture').show();
     console.log('Posture Initialized.');
   },
-  init_led : function(data) {
-    jsnao.al_led = data;
-    //$('#DivPosture').show();
-    console.log('Led Initialized.');
-  },
-  init_autonomous : function(data) {
-    jsnao.al_autonomous = data;
-
-    console.log('Autonomous Initialized.');
-  },
   init_animated : function(data) {
     jsnao.al_ats = data;
+    console.log(data);
     console.log('Animated Speech Initialized.');
-  },
-  init_video : function(data) {
-    jsnao.al_video = data;
-    $('#DivVideo').show();
-    console.log('Video Initialized.');
   },
   init_audioplayer : function (data) {
     jsnao.al_audio = data;
     console.log('Audio Initialized.');
+    console.log(data);
+  },
+  init_almodule : function (data) {
+    jsnao.al_module = data;
+    console.log('ALModule Initialized.');
   },
   level_logs: function(newLevel) {
     var new_level = 4;
