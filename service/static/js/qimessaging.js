@@ -23,6 +23,9 @@ function QiSession(host, resource)
     resource = "libs/qimessaging/1.0/socket.io";
   if (host.substring(0, 7) != "http://")
     host = "http://" + host;
+  console.log(host);
+  console.log(resource);
+
 
   var _socket = io.connect(host, { resource: resource });
   var _dfd = new Array();

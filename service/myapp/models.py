@@ -339,7 +339,6 @@ class CustomizeClassInfo(models.Model):
 
 # 授課教師匯入閱讀課程
 class CustomizeReading(models.Model):
-
     id = models.AutoField(primary_key=True)
     lesson = models.CharField(max_length=100, null=False)
     part = models.IntegerField(null=False)
@@ -354,11 +353,19 @@ class CustomizeExerciseInfo(models.Model):
     category = models.CharField(max_length=100, null=False)
     musicdirectory = models.CharField(max_length=255, null=True)
 
-# # 小組討論
+# 小組討論
 class CustomizeDiscussion(models.Model):
     id = models.AutoField(primary_key=True)
     issuename = models.CharField(max_length=100, null=False, default="")
     issue = models.CharField(max_length=100, null=False)
     sampleanswer = models.CharField(max_length=255, null=True)
     time = models.IntegerField(null=False)
-# Create your models here.
+
+# class CustomizeClassInfo(models.Model):
+#     id = models.AutoField(primary_key=True)
+#     class_id = models.CharField(max_length=100, null=False)
+#     module_sequence = models.CharField(max_length=100, null=True)
+#     module_data = models.CharField(max_length=100, null=False)
+#     module_list = models.CharField(max_length=255, null=False, default="")
+#     attention = models.CharField(max_length=255, null=True)
+#     creation_time = models.DateTimeField(default=timezone.now())
